@@ -1,0 +1,16 @@
+{
+  "name": "card_server",
+  "version": "1.0.0",
+  "description": "Node app for serving multiplayer card games",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dave Cutler <dave.cutler@taggedltd.com>",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.2",
+    "socket.io": "^2.0.4"
+  }
+}
