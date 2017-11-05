@@ -1,5 +1,6 @@
 const express = require('express'),
-    app = express();
+    app = express(),
+    Player = require('./objects/player');
 
 const server = app.listen(process.env.PORT || 5150, () => {
     var port = server.address().port;
@@ -34,6 +35,7 @@ class Game {
 
     addPlayer(player) {
         this.players.push(player);
+        console.log(this.players);
     }
 
     removePlayer(player) {
@@ -46,8 +48,10 @@ var game = new Game();
 io.on('connection', client => {
     console.log('User connected');
 
-    client.on('join', player => {
-        console.log(`Player ${player.name} joined the game`);
+    client.on('join', name => {
+        let player = new Player();
+        game.addPlayer(player);
+        client.emit('connected', player);
         var hand = game.whiteCards.splice(0, 5);
         client.emit('draw', hand);
     });
