@@ -1,0 +1,98 @@
+module.exports = [
+    {
+        id: 1,
+        name: 'Guard',
+        action: "Name a person's card",
+        value: 1,
+    },
+    {
+        id: 2,
+        name: 'Guard',
+        action: "Name a person's card",
+        value: 1,
+    },
+    {
+        id: 3,
+        name: 'Guard',
+        action: "Name a person's card",
+        value: 1,
+    },
+    {
+        id: 4,
+        name: 'Guard',
+        action: "Name a person's card",
+        value: 1,
+    },
+    {
+        id: 5,
+        name: 'Guard',
+        action: "Name a person's card",
+        value: 1,
+    },
+    {
+        id: 6,
+        name: 'Priest',
+        action: "See a person's card",
+        value: 2,
+    },
+    {
+        id: 7,
+        name: 'Priest',
+        action: "See a person's card",
+        value: 2,
+    },
+    {
+        id: 8,
+        name: 'Baron',
+        action: "Do something",
+        value: 3,
+    },
+    {
+        id: 9,
+        name: 'Baron',
+        action: "Do something",
+        value: 3,
+    },
+    {
+        id: 10,
+        name: 'Handmaid',
+        action: "No one can target you",
+        value: 4,
+    },
+    {
+        id: 11,
+        name: 'Handmaid',
+        action: "No one can target you",
+        value: 4,
+    },
+    {
+        id: 12,
+        name: 'Prince',
+        action: "Do something",
+        value: 5,
+    },
+    {
+        id: 13,
+        name: 'Prince',
+        action: "Do something",
+        value: 5,
+    },
+    {
+        id: 14,
+        name: 'King',
+        action: "Do something",
+        value: 6,
+    },
+    {
+        id: 15,
+        name: 'Countess',
+        action: "If you have the Prince or King, you must discard this card",
+        value: 7,
+    },
+    {
+        id: 16,
+        name: 'Princess',
+        action: "If you discard this card, you are out of the round",
+        value: 8,
+    },
+];

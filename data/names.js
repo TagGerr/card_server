@@ -1,4 +1,4 @@
-module.exports = {
+const NAMES = {
     adjectives: [
         'Aggressive',
         'Blasted',
@@ -55,4 +55,11 @@ module.exports = {
         'Yak',
         'Zebu',
     ]
+};
+
+module.exports = () => {
+    const adjective = NAMES.adjectives[ Math.floor(Math.random() * NAMES.adjectives.length) ];
+    const noun = NAMES.nouns[ Math.floor(Math.random() * NAMES.nouns.length)  ];
+    
+    return `${adjective} ${noun}`;
 };
