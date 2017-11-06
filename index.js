@@ -4,6 +4,18 @@ const app = require('express')(),
     generateName = require('./data/names'),
     Player = require('./objects/player');
 
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, *');
+    
+    if ('OPTIONS' == req.method) {
+        res.send(200);
+    } else {
+        next();
+    };
+});
+
 http.listen(5150, () => {
     console.log('Server running on port 5150');
 });
@@ -21,20 +33,18 @@ let players = [],
             id: 'cah',
             name: 'Cards Against Humanity',
         },
-        /*
-        {
-            id: 'joking_hazard',
-            name: 'Joking Hazard',
-        },
-        */
-        {
-            id: 'ava',
-            name: 'Avalon',
-        },
-        {
-            id: 'lol',
-            name: 'Love Letters',
-        }
+        // {
+        //     id: 'joking_hazard',
+        //     name: 'Joking Hazard',
+        // },
+        // {
+        //     id: 'ava',
+        //     name: 'Avalon',
+        // },
+        // {
+        //     id: 'lol',
+        //     name: 'Love Letters',
+        // }
     ];
 
 class Game {
