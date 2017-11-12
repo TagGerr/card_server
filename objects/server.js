@@ -56,7 +56,7 @@ class Server {
             .on('leave-game', () => this.leaveGame(client))
             .on('disconnect', () => this.disconnect(client));
 
-        this.sendMessage(client, 'welcome', {
+        this.sendDirectMessage(client, 'welcome', {
             games: this.games,
             suggested_name: generateName(),
         });
@@ -77,7 +77,7 @@ class Server {
         let rooms = Object.keys(client.rooms);
         for(let room of rooms){
             if( this.roomRegex.test(room) ){
-                client.to(room).emit('received-chat', msg, client.player.name);
+                this.sendRoomMessage(client, room, 'received-chat', msg, client.player.name);
             }
         }
     }
@@ -93,7 +93,7 @@ class Server {
     
                 if(player.name == playerName){
                     console.log('A player is already using that name');
-                    this.sendMessage(client, 'join-failed', {message: 'That name is already in use', suggested_name: generateName()});
+                    this.sendDirectMessage(client, 'join-failed', {message: 'That name is already in use', suggested_name: generateName()});
                     return;
                 }
             }
@@ -106,14 +106,14 @@ class Server {
 
         let game = this.games.find(g => g.id === gameId);
         if( !game ){
-            this.sendMessage(client, 'join-failed', {message: 'No matching game found'});
+            this.sendDirectMessage(client, 'join-failed', {message: 'No matching game found'});
             return;
         }
 
         client.player.game = game;
 
-        this.sendMessage(client, 'player-update', client.player);
-        this.sendMessage(client, 'chose-game');
+        this.sendDirectMessage(client, 'player-update', client.player);
+        this.sendDirectMessage(client, 'chose-game');
     }
 
     createGame(client) {
@@ -136,28 +136,31 @@ class Server {
 
         this.rooms[ game ][ room ] = gameObj;
 
-        this.sendMessage(client, 'player-update', client.player);
-        this.sendMessage(client, 'created-game');
+        this.sendDirectMessage(client, 'player-update', client.player);
+        this.sendDirectMessage(client, 'created-game');
     }
 
     joinGame(client, room) {
         let game = client.player.game.id;
+        let gameRoom = `${game}_${room}`;
         console.log(`${client.player.name} would like to join room ${room} in game ${game}`);
 
-        client.join(`${game}_${room}`);
+        client.join(gameRoom);
         client.player.room = room;
         this.rooms[ game ][ room ].addPlayer(client.player);
 
-        client.to(`${game}_${room}`).emit('player-joined', client.player);
+        this.sendRoomMessage(client, gameRoom, 'player-joined', client.player);
 
-        this.sendMessage(client, 'player-update', client.player);
-        this.sendMessage(client, 'joined-game', rooms[ game ][ room ].players);
+        this.sendDirectMessage(client, 'player-update', client.player);
+        this.sendDirectMessage(client, 'joined-game', rooms[ game ][ room ].players);
     }
 
     leaveGame(client) {
         let game = client.player.game.id;
         let room = client.player.room;
-        client.leave(`${game}_${room}`);
+        let gameRoom = `${game}_${room}`;
+
+        client.leave(gameRoom);
         this.rooms[ game ][ room ].removePlayer(client.player);
         if(this.rooms[ game ][ room ].playerCount < 1){
             delete rooms[ game ][ room ];
@@ -167,10 +170,11 @@ class Server {
         }
 
         delete client.player.room;
-        client.to(`${game}_${room}`).emit('player left', client.player);
+
+        this.sendRoomMessage(client, gameRoom, 'player-left', client.player);
         
-        this.sendMessage(client, 'player-update', client.player);
-        this.sendMessage(client, 'chose-game');
+        this.sendDirectMessage(client, 'player-update', client.player);
+        this.sendDirectMessage(client, 'chose-game');
     }
 
     disconnect(client) {
@@ -178,8 +182,12 @@ class Server {
         this.players = this.players.filter(p => p.id !== client.id);
     }
 
-    sendMessage(client, message, ...data) {
+    sendDirectMessage(client, message, ...data) {
         client.emit(message, ...data);
+    }
+
+    sendRoomMessage(client, room, message, ...data) {
+        client.to(room).emit(message, ...data);
     }
 }
 

@@ -26,6 +26,10 @@ class CardsAgainstHumanity extends Game {
         }
         this.players.forEach(p => this.io.to(p.id).emit('player-update', p));
     }
+
+    sendPlayerCards() {
+
+    }
 }
 
 module.exports = CardsAgainstHumanity;
