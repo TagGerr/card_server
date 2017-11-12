@@ -24,6 +24,10 @@ class Server {
             {
                 id: 'lol',
                 name: 'Love Letters',
+            },
+            {
+                id: '31',
+                name: 'Thirty-One',
             }
         ];
         this.gameKeys = this.games.map(g => g.id);
