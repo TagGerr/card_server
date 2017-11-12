@@ -1,6 +1,6 @@
 const generateName = require('../data/names'),
     Player = require('./player'),
-    games = require('./games');
+    gameObjects = require('./games');
 
 var s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
 
@@ -74,8 +74,8 @@ class Server {
     }
 
     handleChatMessage(client, msg) {
-        let rooms = Object.keys(client.rooms);
-        for(let room of rooms){
+        let playersRooms = Object.keys(client.rooms);
+        for(let room of playersRooms){
             if( this.roomRegex.test(room) ){
                 this.sendRoomMessage(client, room, 'received-chat', msg, client.player.name);
             }
@@ -131,7 +131,7 @@ class Server {
         client.join(`${game}_${room}`);
         client.player.room = room;
 
-        let gameObj = new games[ game ](this.io);
+        let gameObj = new gameObjects[ game ](this.io);
         gameObj.addPlayer(client.player);
 
         this.rooms[ game ][ room ] = gameObj;
@@ -152,7 +152,7 @@ class Server {
         this.sendRoomMessage(client, gameRoom, 'player-joined', client.player);
 
         this.sendDirectMessage(client, 'player-update', client.player);
-        this.sendDirectMessage(client, 'joined-game', rooms[ game ][ room ].players);
+        this.sendDirectMessage(client, 'joined-game', this.rooms[ game ][ room ].players);
     }
 
     leaveGame(client) {
@@ -163,9 +163,9 @@ class Server {
         client.leave(gameRoom);
         this.rooms[ game ][ room ].removePlayer(client.player);
         if(this.rooms[ game ][ room ].playerCount < 1){
-            delete rooms[ game ][ room ];
+            delete this.rooms[ game ][ room ];
             if(this.rooms[ game ].length < 1){
-                delete rooms[ game ];
+                delete this.rooms[ game ];
             }
         }
 
