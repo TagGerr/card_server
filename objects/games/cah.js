@@ -8,7 +8,7 @@ const GAME_STATE = [
     'score'
 ];
 const MAX_POINTS = 5;
-const CARDS_PER_HAND = 4;
+const CARDS_PER_HAND = 10;
 
 class CardsAgainstHumanity extends Game {
     constructor(io, gameRoom) {
@@ -26,7 +26,7 @@ class CardsAgainstHumanity extends Game {
         });
     }
 
-    handleGameEvent(event, player, data){
+    handleGameEvent(player, event, data){
         switch(event){
             case 'start':
                 this.prepareGame();
@@ -50,7 +50,7 @@ class CardsAgainstHumanity extends Game {
 
         this.players.map(p => {
             p.hand = [];
-            p.points = 0;
+            p.score = 0;
         });
 
         this.blackDeck = this.shuffle(cards.black);
@@ -154,7 +154,7 @@ class CardsAgainstHumanity extends Game {
             return this.sendPlayerMessage(player, 'invalid-card');
         }
 
-        winningPlayer.points += this.round.blackCard.plays;
+        winningPlayer.score += this.round.blackCard.plays;
         this.sendRoomMessage('selected-card', card, winningPlayer);
 
         return this.scoreRound();
@@ -170,7 +170,7 @@ class CardsAgainstHumanity extends Game {
         this.sendRoomMessage('update-scores', this.broadcastPlayerData);
 
         this.players.some(p => {
-            if(p.points >= MAX_POINTS){
+            if(p.score >= MAX_POINTS){
                 return this.endGame(p);
             }
         });

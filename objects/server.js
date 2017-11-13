@@ -157,6 +157,10 @@ class Server {
     }
 
     leaveGame(client) {
+        if(typeof client.player === 'undefined'){
+            return;
+        }
+        
         let game = client.player.game.id;
         let room = client.player.room;
         let gameRoom = `${game}_${room}`;

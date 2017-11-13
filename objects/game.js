@@ -32,7 +32,7 @@ class Game {
     }
 
     dealCard(deck) {
-        return deck.splice(0, 1);
+        return deck.splice(0, 1)[0];
     }
 
     sendPlayerMessage(player, message, ...data) {
