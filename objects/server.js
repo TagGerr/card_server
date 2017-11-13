@@ -42,7 +42,7 @@ class Server {
             if(packet[0] == 'game-event'){
                 let game = this.findClientGame(client);
                 if( game ){
-                    return game.handleGameEvent(...packet.slice(1));
+                    return game.handleGameEvent(client.player, ...packet.slice(1));
                 }
             }
             next();
@@ -63,7 +63,7 @@ class Server {
     }
 
     findClientGame(client) {
-        if(typeof client.player == 'undefined' || typeof client.player.game == 'undefined' || typeof client.player.room == 'undefined'){
+        if(typeof client.player === 'undefined' || typeof client.player.game === 'undefined' || typeof client.player.room === 'undefined'){
             return false;
         }
 
@@ -128,10 +128,11 @@ class Server {
             room = s4();
         }
 
-        client.join(`${game}_${room}`);
+        let gameRoom = `${game}_${room}`;
+        client.join(gameRoom);
         client.player.room = room;
 
-        let gameObj = new gameObjects[ game ](this.io);
+        let gameObj = new gameObjects[ game ](this.io, gameRoom);
         gameObj.addPlayer(client.player);
 
         this.rooms[ game ][ room ] = gameObj;
@@ -160,6 +161,10 @@ class Server {
         let room = client.player.room;
         let gameRoom = `${game}_${room}`;
 
+        if(typeof game === 'undefined' || typeof room === 'undefined'){
+            return;
+        }
+
         client.leave(gameRoom);
         this.rooms[ game ][ room ].removePlayer(client.player);
         if(this.rooms[ game ][ room ].playerCount < 1){
@@ -179,6 +184,7 @@ class Server {
 
     disconnect(client) {
         console.log(`Player ${client.id} has left the game`);
+        this.leaveGame(client);
         this.players = this.players.filter(p => p.id !== client.id);
     }
 
