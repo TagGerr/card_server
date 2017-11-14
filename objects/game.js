@@ -15,12 +15,12 @@ class Game {
         this.players.push({id: player.id, name: player.name});
     }
 
-    removePlayer(player) {
-        this.players = this.players.filter(p => p.id !== player.id);
+    removePlayer({id: playerId}) {
+        this.players = this.players.filter(p => p.id !== playerId);
     }
 
-    findPlayerInGame(playerId) {
-        return this.players.find(p => p.id === player_id);
+    findPlayerInGame({id: playerId}) {
+        return this.players.find(p => p.id === playerId);
     }
 
     shuffle(cards) {
@@ -35,8 +35,8 @@ class Game {
         return deck.splice(0, 1)[0];
     }
 
-    sendPlayerMessage(player, message, ...data) {
-        return this.io.to(player.id).emit('game-data', message, ...data);
+    sendPlayerMessage({id: playerId}, message, ...data) {
+        return this.io.to(playerId).emit('game-data', message, ...data);
     }
 
     sendRoomMessage(message, ...data) {

@@ -26,8 +26,8 @@ class CardsAgainstHumanity extends Game {
         });
     }
 
-    handleGameEvent(player, event, data){
-        switch(event){
+    handleGameEvent(player, eventName, ...data){
+        switch(eventName){
             case 'start':
                 this.prepareGame();
                 break;
@@ -41,7 +41,7 @@ class CardsAgainstHumanity extends Game {
                 break;
 
             default:
-                console.log(`${event} is not yet handled!`);
+                console.log(`${eventName} is not yet handled!`);
         }
     }
 
@@ -100,22 +100,22 @@ class CardsAgainstHumanity extends Game {
             return;
         }
 
-        let player = this.findPlayerInGame(player);
+        player = this.findPlayerInGame(player);
         
-        if(typeof this.playedCards[ player.id ] !== 'undefined'){
+        if(typeof this.round.playedCards[ player.id ] !== 'undefined'){
             return this.sendPlayerMessage(player, 'already-played');
         }
 
-        let cardIndex = player.hand.findIndex(card);
+        let cardIndex = player.hand.findIndex(c => c.id === card.id);
 
         if(cardIndex === -1){
             return this.sendPlayerMessage(player, 'invalid-card');
         }
 
         player.hand.splice(cardIndex, 1);
-        this.playedCards[ player.id ] = card;
+        this.round.playedCards[ player.id ] = card;
 
-        let playersPlayed = Object.keys(this.playedCards);
+        let playersPlayed = Object.keys(this.round.playedCards);
         let allPlayersPlayed = this.players.every((p, idx) => playersPlayed.includes(p.id) || idx === this.czar);
         if( allPlayersPlayed ){
             return this.judgeRound();
@@ -125,7 +125,7 @@ class CardsAgainstHumanity extends Game {
     judgeRound() {
         this.state = 'judge';
 
-        let selectedCards = Array.from(Object.values(this.playedCards));
+        let selectedCards = Array.from(Object.values(this.round.playedCards));
         selectedCards = this.shuffle(selectedCards);
 
         this.sendRoomMessage('cards-played', selectedCards);
@@ -137,14 +137,14 @@ class CardsAgainstHumanity extends Game {
             return;
         }
 
-        let player = this.findPlayerInGame(player);
+        player = this.findPlayerInGame(player);
         if(player !== this.players[ this.czar ]){
             return this.sendPlayerMessage(player, 'not-czar');
         }
 
         let winningPlayer;
-        for(const [playerId, playedCard] of Object.values(this.playedCards)){
-            if(playedCard === card){
+        for(const [playerId, playedCard] of Object.entries(this.round.playedCards)){
+            if(playedCard.id === card.id){
                 winningPlayer = this.findPlayerInGame({id: playerId});
                 break;
             }
@@ -154,7 +154,7 @@ class CardsAgainstHumanity extends Game {
             return this.sendPlayerMessage(player, 'invalid-card');
         }
 
-        winningPlayer.score += this.round.blackCard.plays;
+        winningPlayer.score += this.round.blackCard.play;
         this.sendRoomMessage('selected-card', card, winningPlayer);
 
         return this.scoreRound();
@@ -169,13 +169,15 @@ class CardsAgainstHumanity extends Game {
 
         this.sendRoomMessage('update-scores', this.broadcastPlayerData);
 
-        this.players.some(p => {
+        let gameOver = this.players.some(p => {
             if(p.score >= MAX_POINTS){
                 return this.endGame(p);
             }
         });
 
-        return this.startRound();
+        if( !gameOver ){
+            return this.startRound();
+        }
     }
 
     endGame(player) {
