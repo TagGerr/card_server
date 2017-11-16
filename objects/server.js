@@ -152,7 +152,7 @@ class Server {
         try {
         	this.rooms[ game ][ room ].addPlayer(client.player);
         } catch (err) {
-        	this.sendDirectMessage(client, 'join-failed', err.message);
+        	return this.sendDirectMessage(client, 'join-failed', err.message);
         }
 
         this.sendRoomMessage(client, gameRoom, 'player-joined', client.player);

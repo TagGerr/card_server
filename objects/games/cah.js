@@ -46,6 +46,10 @@ class CardsAgainstHumanity extends Game {
     }
 
     prepareGame() {
+    	if(this.playerCount < this.minPlayers){
+    		this.sendRoomMessage('start-failed', 'Not enough players');
+    	}
+    	
         this.players = this.shuffle(this.players);
 
         this.players.map(p => {
