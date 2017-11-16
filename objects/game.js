@@ -12,6 +12,9 @@ class Game {
     }
 
     addPlayer(player) {
+    	if(this.playerCount >= this.maxPlayers){
+    		throw Error('Too many players');
+    	}
         this.players.push({id: player.id, name: player.name});
     }
 
