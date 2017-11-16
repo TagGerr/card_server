@@ -98,7 +98,7 @@ class CardsAgainstHumanity extends Game {
         return;
     }
 
-    playCard(player, card) {
+    playCard(player, cards) {
         if(this.state !== 'play'){
             this.sendPlayerMessage(player, 'invalid-state');
             return;
@@ -110,14 +110,21 @@ class CardsAgainstHumanity extends Game {
             return this.sendPlayerMessage(player, 'already-played');
         }
 
-        let cardIndex = player.hand.findIndex(c => c.id === card.id);
-
-        if(cardIndex === -1){
-            return this.sendPlayerMessage(player, 'invalid-card');
+        if(cards.length < 1){
+            return this.sendPlayerMessage(player, 'no-cards');
         }
 
-        player.hand.splice(cardIndex, 1);
-        this.round.playedCards[ player.id ] = card;
+        let cardIds = cards.map(c => c.id);
+
+        let cardsAreUnique = cardIds.length !== (new Set(cardIds)).length;
+        let playerHasCards = cardIds.every(i => player.hand.some(pc => pc.id === i));
+        if( !cardsAreUnique || !playerHasCards ){
+            return this.sendPlayerMessage(player, 'invalid-cards');
+        }
+
+        player.hand = player.hand.filter(pc => !cardIds.includes(pc.id));
+
+        this.round.playedCards[ player.id ] = cards;
 
         let playersPlayed = Object.keys(this.round.playedCards);
         let allPlayersPlayed = this.players.every((p, idx) => playersPlayed.includes(p.id) || idx === this.czar);
@@ -147,8 +154,8 @@ class CardsAgainstHumanity extends Game {
         }
 
         let winningPlayer;
-        for(const [playerId, playedCard] of Object.entries(this.round.playedCards)){
-            if(playedCard.id === card.id){
+        for(const [playerId, playedCards] of Object.entries(this.round.playedCards)){
+            if( playedCards.some(c => c.id === card.id) ){
                 winningPlayer = this.findPlayerInGame({id: playerId});
                 break;
             }
