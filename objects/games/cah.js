@@ -1,12 +1,6 @@
 const cards = require('../../data/decks/cards_against_humanity'),
     Game = require('../game');
 
-const GAME_STATE = [
-    'prepare',
-    'play',
-    'choose',
-    'score'
-];
 const MAX_POINTS = 5;
 const CARDS_PER_HAND = 10;
 
@@ -15,7 +9,8 @@ class CardsAgainstHumanity extends Game {
         super(io, gameRoom, 3, 10);
 
         this.czar = 0;
-        this.state = null;
+        this.state = 'new';
+        this.pausedState = null;
 
         this.round = {};
     }
@@ -29,7 +24,7 @@ class CardsAgainstHumanity extends Game {
     handleGameEvent(player, eventName, ...data){
         switch(eventName){
             case 'start':
-                this.prepareGame();
+                this.prepareGame(player);
                 break;
 
             case 'play-card':
@@ -45,9 +40,32 @@ class CardsAgainstHumanity extends Game {
         }
     }
 
-    prepareGame() {
+    removePlayer(player) {
+        super.removePlayer(player);
+        if(this.state !== 'new'){
+            if(this.playerCount < this.minPlayers){
+                this.pausedState = this.state;
+                this.state = 'paused';
+            }
+        }
+    }
+
+    addPlayer(player) {
+        super.addPlayer(player);
+        if(this.state === 'paused'){
+            if(this.playerCount >= this.minPlayers){
+                this.state = this.pausedState;
+            }
+        }
+    }
+
+    prepareGame(player) {
+        if(this.state !== 'new' && this.state !== 'end'){
+            return this.sendPlayerMessage(player, 'start-failed', `Invalid state: ${this.state}`);
+        }
+
     	if(this.playerCount < this.minPlayers){
-    		return this.sendRoomMessage('start-failed', 'Not enough players');
+    		return this.sendPlayerMessage(player, 'start-failed', 'Not enough players');
         }
     	
         this.players = this.shuffle(this.players);
