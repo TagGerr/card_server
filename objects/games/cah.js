@@ -12,7 +12,7 @@ const CARDS_PER_HAND = 10;
 
 class CardsAgainstHumanity extends Game {
     constructor(io, gameRoom) {
-        super(io, gameRoom, 3, 6);
+        super(io, gameRoom, 3, 10);
 
         this.czar = 0;
         this.state = null;
@@ -47,8 +47,8 @@ class CardsAgainstHumanity extends Game {
 
     prepareGame() {
     	if(this.playerCount < this.minPlayers){
-    		this.sendRoomMessage('start-failed', 'Not enough players');
-    	}
+    		return this.sendRoomMessage('start-failed', 'Not enough players');
+        }
     	
         this.players = this.shuffle(this.players);
 
