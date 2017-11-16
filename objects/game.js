@@ -12,11 +12,26 @@ class Game {
     }
 
     addPlayer(player) {
+    	if(this.playerCount >= this.maxPlayers){
+    		throw Error('Too many players');
+    	}
+    	
         this.players.push({id: player.id, name: player.name});
+        this.checkPlayerCount();
     }
-
+    
     removePlayer({id: playerId}) {
         this.players = this.players.filter(p => p.id !== playerId);
+        this.checkPlayerCount();
+    }
+    
+    checkPlayerCount() {
+        if(this.playerCount >= this.minPlayers){
+            this.sendRoomMessage('game-ready', 'Enough players');
+        } else {
+            let shortCount = this.minPlayers - this.playerCount;
+            this.sendRoomMessage('game-wait', `Need ${shortCount} player${shortCount === 1 ? '' : 's'}`);
+        }
     }
 
     findPlayerInGame({id: playerId}) {
