@@ -5,8 +5,8 @@ const MAX_POINTS = 3;
 const CARDS_PER_HAND = 7;
 
 class JokingHazard extends Game {
-    constructor() {
-        super(io, 3, 10);
+    constructor(io, gameRoom) {
+        super(io, gameRoom, 3, 10);
 
         this.judge = 0;
         this.state = 'new';
@@ -156,7 +156,7 @@ class JokingHazard extends Game {
             } else {
                 this.sendPlayerMessage(p, 'joke-setup', this.round.setupCard, position);
             }
-        }
+        });
     }
 
     playCard(player, cards) {
@@ -193,3 +193,5 @@ class JokingHazard extends Game {
         }
     }
 }
+
+module.exports = JokingHazard;
