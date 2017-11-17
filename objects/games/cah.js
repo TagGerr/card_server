@@ -118,8 +118,7 @@ class CardsAgainstHumanity extends Game {
 
     playCard(player, cards) {
         if(this.state !== 'play'){
-            this.sendPlayerMessage(player, 'invalid-state');
-            return;
+            return this.sendPlayerMessage(player, 'invalid-state');
         }
 
         player = this.findPlayerInGame(player);
@@ -162,8 +161,7 @@ class CardsAgainstHumanity extends Game {
 
     selectCard(player, card) {
         if(this.state !== 'judge'){
-            this.sendPlayerMessage(player, 'invalid-state');
-            return;
+            return this.sendPlayerMessage(player, 'invalid-state');
         }
 
         player = this.findPlayerInGame(player);
