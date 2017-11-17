@@ -6,7 +6,7 @@ const CARDS_PER_HAND = 7;
 
 class JokingHazard extends Game {
     constructor(io, gameRoom) {
-        super(io, gameRoom, 3, 10);
+        super(io, gameRoom, 1, 10);
 
         this.judge = 0;
         this.state = 'new';
@@ -87,7 +87,7 @@ class JokingHazard extends Game {
     }
 
     startRound() {
-        this.state = 'play';
+        this.state = 'setup';
 
         this.fillHands();
         
