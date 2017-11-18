@@ -150,6 +150,8 @@ class JokingHazard extends Game {
         player.hand.splice(cardIndex, 1);
         this.round.setupCard = card;
 
+        this.state = 'play';
+
         this.players.forEach((p, idx) => {
             if(idx === this.judge){
                 this.sendPlayerMessage(p, 'judge-wait');
@@ -171,7 +173,11 @@ class JokingHazard extends Game {
         }
 
         if(cards.length < 1){
-            return this.sendPlayerMessage(player, 'no-cards');
+            return this.sendPlayerMessage(player, 'bad-cards', 'You must choose at least one card');
+        } else if(this.round.style === 'regular' && cards.length !== 1){
+            return this.sendPlayerMessage(player, 'bad-cards', 'Regular rounds only need one card');
+        } else if(this.round.style === 'bonus' && cards.length !== 2){
+            return this.sendPlayerMessage(player, 'bad-card', 'Bonus rounds require exactly 2 cards');
         }
 
         let cardIds = cards.map(c => c.id);
@@ -187,10 +193,19 @@ class JokingHazard extends Game {
         this.round.playedCards[ player.id ] = cards;
 
         let playersPlayed = Object.keys(this.round.playedCards);
-        let allPlayersPlayed = this.players.every((p, idx) => playersPlayed.includes(p.id) || idx === this.czar);
+        let allPlayersPlayed = this.players.every((p, idx) => playersPlayed.includes(p.id) || idx === this.judge);
         if( allPlayersPlayed ){
             return this.judgeRound();
         }
+    }
+
+    judgeRound() {
+        this.state = 'judge';
+
+        let selectedCards = Array.from(Object.values(this.round.playedCards));
+        selectedCards = this.shuffle(selectedCards);
+
+        this.sendRoomMessage('cards-played', selectedCards);
     }
 }
 
