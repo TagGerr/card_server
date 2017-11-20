@@ -1,7 +1,7 @@
 const cards = require('../../data/decks/joking_hazard'),
     Game = require('../game');
 
-const MAX_POINTS = 3;
+const MAX_POINTS = 5;
 const CARDS_PER_HAND = 7;
 
 class JokingHazard extends Game {
