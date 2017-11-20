@@ -79,7 +79,7 @@ class JokingHazard extends Game {
             p.score = 0;
         });
 
-        this.deck = this.shuffle(cards);
+        this.deck = this.shuffle(Object.assign([], cards));
         
         this.sendRoomMessage('game-started', this.broadcastPlayerData, MAX_POINTS);
 
@@ -91,7 +91,10 @@ class JokingHazard extends Game {
 
         this.fillHands();
         
-        let introCard = this.dealCard(this.deck);
+        let introCard;
+        do {
+            introCard = this.dealCard(this.deck);
+        } while(introCard.color !== 'red');
         this.round = {
             introCard: introCard,
             style: introCard.color === 'red' ? 'bonus' : 'regular',
@@ -103,6 +106,7 @@ class JokingHazard extends Game {
         if(this.round.style === 'bonus'){
             playerMessage = 'player-bonus';
             judgeMessage = 'judge-bonus';
+            this.state = 'play';
         }
 
         this.players.forEach((p, idx) => {
@@ -206,6 +210,62 @@ class JokingHazard extends Game {
         selectedCards = this.shuffle(selectedCards);
 
         this.sendRoomMessage('cards-played', selectedCards);
+    }
+
+    selectCard(player, card) {
+        if(this.state !== 'judge'){
+            return this.sendPlayerMessage(player, 'invalid-state');
+        }
+
+        player = this.findPlayerInGame(player);
+        if(player !== this.players[ this.judge ]){
+            return this.sendPlayerMessage(player, 'not-judge');
+        }
+
+        let winningPlayer, winningCards;
+        for(const [playerId, playedCards] of Object.entries(this.round.playedCards)){
+            if( playedCards.some(c => c.id === card.id) ){
+                winningPlayer = this.findPlayerInGame({id: playerId});
+                winningCards = playedCards;
+                break;
+            }
+        }
+
+        if(typeof winningPlayer === 'undefined'){
+            return this.sendPlayerMessage(player, 'invalid-card');
+        }
+
+        winningPlayer.score += this.round.style === 'bonus' ? 2 : 1;
+        this.sendRoomMessage('selected-card', winningCards, winningPlayer);
+
+        return this.scoreRound();
+    }
+
+    scoreRound() {
+        this.state = 'score';
+        this.judge += 1;
+        if(this.judge >= this.players.length){
+            this.judge = 0;
+        }
+
+        this.sendRoomMessage('update-scores', this.broadcastPlayerData);
+
+        let gameOver = this.players.some(p => {
+            if(p.score >= MAX_POINTS){
+                return this.endGame(p);
+            }
+        });
+
+        if( !gameOver ){
+            return this.startRound();
+        }
+    }
+
+    endGame(player) {
+        this.state = 'end';
+
+        this.sendRoomMessage('player-wins', player);
+        return true;
     }
 }
 
