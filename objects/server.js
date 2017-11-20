@@ -175,11 +175,13 @@ class Server {
         }
 
         client.leave(gameRoom);
-        this.rooms[ game ][ room ].removePlayer(client.player);
-        if(this.rooms[ game ][ room ].playerCount < 1){
-            delete this.rooms[ game ][ room ];
-            if(this.rooms[ game ].length < 1){
-                delete this.rooms[ game ];
+        if(this.rooms[ game ][ room ]){
+            this.rooms[ game ][ room ].removePlayer(client.player);
+            if(this.rooms[ game ][ room ].playerCount < 1){
+                delete this.rooms[ game ][ room ];
+                if(this.rooms[ game ].length < 1){
+                    delete this.rooms[ game ];
+                }
             }
         }
 
