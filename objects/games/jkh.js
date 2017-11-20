@@ -6,7 +6,7 @@ const CARDS_PER_HAND = 7;
 
 class JokingHazard extends Game {
     constructor(io, gameRoom) {
-        super(io, gameRoom, 1, 10);
+        super(io, gameRoom, 3, 10);
 
         this.judge = 0;
         this.state = 'new';
@@ -91,10 +91,7 @@ class JokingHazard extends Game {
 
         this.fillHands();
         
-        let introCard;
-        do {
-            introCard = this.dealCard(this.deck);
-        } while(introCard.color !== 'red');
+        let introCard = this.dealCard(this.deck);
         this.round = {
             introCard: introCard,
             style: introCard.color === 'red' ? 'bonus' : 'regular',
