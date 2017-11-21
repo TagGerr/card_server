@@ -5,8 +5,8 @@ const MAX_POINTS = 5;
 const CARDS_PER_HAND = 10;
 
 class CardsAgainstHumanity extends Game {
-    constructor(io, gameRoom) {
-        super(io, gameRoom, 3, 10);
+    constructor(io, gameRoom, announce = true) {
+        super(io, gameRoom, 3, 10, announce);
 
         this.czar = 0;
         this.state = 'new';

@@ -82,16 +82,40 @@ class Server {
         }
     }
 
+    getOpenGames(gameId) {
+        let openGames = {};
+        if(typeof this.rooms[ gameId ] !== 'undefined'){
+            for(let [room, game] of Object.entries(this.rooms[ gameId ])){
+                if( game.announce && game.playerCount < game.maxPlayers ){
+                    openGames[ room ] = {
+                        players: game.playerCount,
+                        maxPlayers: game.maxPlayers
+                    };
+                }
+            }
+        }
+        return openGames;
+    }
+
+    announceOpenGames(gameId) {
+        let openGames = this.getOpenGames(gameId);
+        this.players.forEach(player => {
+            if(typeof player.game !== 'undefined' && player.game.id === gameId && typeof player.room === 'undefined'){
+                this.sendDirectMessage(player, 'open-games', openGames);
+            }
+        });
+    }
+
     chooseGame(client, playerName, gameId) {
         if(typeof client.player === 'undefined'){
             for(let player of this.players){
-                if(player.id == client.id){
+                if(player.id === client.id){
                     console.log('Player is already connected');
                     client.player = player;
                     break;
                 }
     
-                if(player.name == playerName){
+                if(player.name === playerName){
                     console.log('A player is already using that name');
                     this.sendDirectMessage(client, 'join-failed', {message: 'That name is already in use', suggested_name: generateName()});
                     return;
@@ -100,6 +124,7 @@ class Server {
 
             if( !client.player ){
                 let player = new Player(client.id, playerName);
+                this.players.push(player);
                 client.player = player;
             }
         }
@@ -114,6 +139,8 @@ class Server {
 
         this.sendDirectMessage(client, 'player-update', client.player);
         this.sendDirectMessage(client, 'chose-game');
+
+        this.sendDirectMessage(client, 'open-games', this.getOpenGames(gameId));
     }
 
     createGame(client) {
@@ -139,9 +166,15 @@ class Server {
 
         this.sendDirectMessage(client, 'player-update', client.player);
         this.sendDirectMessage(client, 'created-game');
+
+        if( gameObj.announce ){
+            this.announceOpenGames(game);
+        }
     }
 
     joinGame(client, room) {
+        room = room.toLowerCase();
+
         let game = client.player.game.id;
         let gameRoom = `${game}_${room}`;
         console.log(`${client.player.name} would like to join room ${room} in game ${game}`);
@@ -152,13 +185,17 @@ class Server {
         try {
         	this.rooms[ game ][ room ].addPlayer(client.player);
         } catch (err) {
-        	return this.sendDirectMessage(client, 'join-failed', err.message);
+        	return this.sendDirectMessage(client, 'join-failed', {message: err.message});
         }
 
         this.sendRoomMessage(client, gameRoom, 'player-joined', client.player);
 
         this.sendDirectMessage(client, 'player-update', client.player);
         this.sendDirectMessage(client, 'joined-game', this.rooms[ game ][ room ].players);
+
+        if(this.rooms[ game ][ room ].announce){
+            this.announceOpenGames(game);
+        }
     }
 
     leaveGame(client) {
@@ -178,7 +215,13 @@ class Server {
         if(this.rooms[ game ][ room ]){
             this.rooms[ game ][ room ].removePlayer(client.player);
             if(this.rooms[ game ][ room ].playerCount < 1){
+                let announceRemoval = this.rooms[ game ][ room ].announce;
                 delete this.rooms[ game ][ room ];
+
+                if( announceRemoval ){
+                    this.announceOpenGames(game);
+                }
+
                 if(this.rooms[ game ].length < 1){
                     delete this.rooms[ game ];
                 }
@@ -191,6 +234,8 @@ class Server {
         
         this.sendDirectMessage(client, 'player-update', client.player);
         this.sendDirectMessage(client, 'chose-game');
+
+        this.sendDirectMessage(client, 'open-games', this.getOpenGames(game));
     }
 
     disconnect(client) {
@@ -199,8 +244,8 @@ class Server {
         this.players = this.players.filter(p => p.id !== client.id);
     }
 
-    sendDirectMessage(client, message, ...data) {
-        client.emit(message, ...data);
+    sendDirectMessage({id: socketId}, message, ...data) {
+        this.io.to(socketId).emit(message, ...data);
     }
 
     sendRoomMessage(client, room, message, ...data) {

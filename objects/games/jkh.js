@@ -5,8 +5,8 @@ const MAX_POINTS = 5;
 const CARDS_PER_HAND = 7;
 
 class JokingHazard extends Game {
-    constructor(io, gameRoom) {
-        super(io, gameRoom, 3, 10);
+    constructor(io, gameRoom, announce = true) {
+        super(io, gameRoom, 3, 10, announce);
 
         this.judge = 0;
         this.state = 'new';

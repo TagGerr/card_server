@@ -1,10 +1,12 @@
 class Game {
-    constructor(io, gameRoom, minPlayers, maxPlayers) {
+    constructor(io, gameRoom, minPlayers, maxPlayers, announce = true) {
         this.io = io;
         this.gameRoom = gameRoom;
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
         this.players = [];
+
+        this.announce = announce;
     }
 
     get playerCount() {
