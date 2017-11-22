@@ -93,6 +93,8 @@ class CardsAgainstHumanity extends Game {
             playedCards: {}
         };
 
+        this.sendRoomMessage('round-start', this.players[ this.czar ].id);
+
         this.players.forEach((p, idx) => {
             if(idx === this.czar){
                 this.sendPlayerMessage(p, 'czar-wait', this.round.blackCard);

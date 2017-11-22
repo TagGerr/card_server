@@ -106,6 +106,8 @@ class JokingHazard extends Game {
             this.state = 'play';
         }
 
+        this.sendRoomMessage('round-start', this.players[ this.judge ].id);
+
         this.players.forEach((p, idx) => {
             if(idx === this.judge){
                 this.sendPlayerMessage(p, judgeMessage, this.round.introCard, p.hand);
