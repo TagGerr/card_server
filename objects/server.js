@@ -107,6 +107,11 @@ class Server {
     }
 
     chooseGame(client, playerName, gameId) {
+        playerName = playerName.trim();
+        if(playerName.length < 3){
+            return this.sendDirectMessage(client, 'join-failed', {message: 'Player names must be at least 3 characters', suggested_name: generateName()});
+        }
+
         if(typeof client.player === 'undefined'){
             for(let player of this.players){
                 if(player.id === client.id){
@@ -117,8 +122,7 @@ class Server {
     
                 if(player.name === playerName){
                     console.log('A player is already using that name');
-                    this.sendDirectMessage(client, 'join-failed', {message: 'That name is already in use', suggested_name: generateName()});
-                    return;
+                    return this.sendDirectMessage(client, 'join-failed', {message: 'That name is already in use', suggested_name: generateName()});
                 }
             }
 
@@ -131,8 +135,7 @@ class Server {
 
         let game = this.games.find(g => g.id === gameId);
         if( !game ){
-            this.sendDirectMessage(client, 'join-failed', {message: 'No matching game found'});
-            return;
+            return this.sendDirectMessage(client, 'join-failed', {message: 'No matching game found'});
         }
 
         client.player.game = game;
@@ -173,10 +176,18 @@ class Server {
     }
 
     joinGame(client, room) {
-        room = room.toLowerCase();
+        room = room.trim().toLowerCase();
+        if(room.length < 1){
+            return this.sendDirectMessage(client, 'join-failed', {message: 'Please specify a room code'});
+        }
 
-        let game = client.player.game.id;
-        let gameRoom = `${game}_${room}`;
+        let game = client.player.game.id,
+            gameRoom = `${game}_${room}`;
+
+        if(typeof this.rooms[ game ] === 'undefined' || typeof this.rooms[ game ][ room ] === 'undefined'){
+            return this.sendDirectMessage(client, 'join-failed', {message: 'Invalid room code'});
+        }
+        
         console.log(`${client.player.name} would like to join room ${room} in game ${game}`);
 
         client.join(gameRoom);
@@ -246,10 +257,12 @@ class Server {
 
     sendDirectMessage({id: socketId}, message, ...data) {
         this.io.to(socketId).emit(message, ...data);
+        return true;
     }
 
     sendRoomMessage(client, room, message, ...data) {
         client.to(room).emit(message, ...data);
+        return true;
     }
 }
 
