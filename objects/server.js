@@ -147,20 +147,25 @@ class Server {
     }
 
     createGame(client) {
-        console.log(`${client.player.name} has created a game!`);
-        let game = client.player.game.id;
+        let game = client.player.game.id,
+            gameTitle = this.games.find(g => g.id === game).name;
+
+        console.log(`${client.player.name} has created a game of ${gameTitle}!`);
+        
         if(typeof this.rooms[ game ] === 'undefined'){
             this.rooms[ game ] = {};
         }
 
-        let room = s4();
-        while(typeof this.rooms[ game ][ room ] !== 'undefined'){
+        let room;
+        do {
             room = s4();
-        }
+        } while(typeof this.rooms[ game ][ room ] !== 'undefined');
 
         let gameRoom = `${game}_${room}`;
         client.join(gameRoom);
         client.player.room = room;
+
+        console.log(`${gameTitle} can now be played in room ${room}`);
 
         let gameObj = new gameObjects[ game ](this.io, gameRoom);
         gameObj.addPlayer(client.player);

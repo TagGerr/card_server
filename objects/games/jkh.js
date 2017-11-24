@@ -79,7 +79,7 @@ class JokingHazard extends Game {
             p.score = 0;
         });
 
-        this.deck = this.shuffle(Object.assign([], cards));
+        this.deck = this.shuffle(cards);
         
         this.sendRoomMessage('game-started', this.broadcastPlayerData, MAX_POINTS);
 

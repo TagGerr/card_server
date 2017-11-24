@@ -40,12 +40,13 @@ class Game {
         return this.players.find(p => p.id === playerId);
     }
 
-    shuffle(cards) {
-        for(let i = cards.length - 1; i > 0; i--){
+    shuffle(objects) {
+        objects = Object.assign([], objects);
+        for(let i = objects.length - 1; i > 0; i--){
             let j = Math.floor(Math.random() * (i + 1));
-            [cards[i], cards[j]] = [cards[j], cards[i]];
+            [objects[i], objects[j]] = [objects[j], objects[i]];
         }
-        return cards;
+        return objects;
     }
 
     dealCard(deck) {
