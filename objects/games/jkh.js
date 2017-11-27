@@ -71,15 +71,15 @@ class JokingHazard extends Game {
     	if(this.playerCount < this.minPlayers){
     		return this.sendPlayerMessage(player, 'start-failed', 'Not enough players');
         }
-    	
+        
+        this.judge = 0;
+        this.deck = this.shuffle(cards);
         this.players = this.shuffle(this.players);
 
         this.players.map(p => {
             p.hand = [];
             p.score = 0;
         });
-
-        this.deck = this.shuffle(cards);
         
         this.sendRoomMessage('game-started', this.broadcastPlayerData, MAX_POINTS);
 
