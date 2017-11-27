@@ -135,7 +135,7 @@ class CardsAgainstHumanity extends Game {
 
         let cardIds = cards.map(c => c.id);
 
-        let cardsAreUnique = cardIds.length !== (new Set(cardIds)).length;
+        let cardsAreUnique = cardIds.length === (new Set(cardIds)).size;
         let playerHasCards = cardIds.every(i => player.hand.some(pc => pc.id === i));
         if( !cardsAreUnique || !playerHasCards ){
             return this.sendPlayerMessage(player, 'invalid-cards');
