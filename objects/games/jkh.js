@@ -147,7 +147,7 @@ class JokingHazard extends Game {
 
         let cardIndex = player.hand.findIndex(c => c.id === card.id);
         if(cardIndex === -1){
-            return this.sendPlayerMessage(player, 'invalid-card');
+            return this.sendPlayerMessage(player, 'invalid-card', player.hand);
         }
 
         player.hand.splice(cardIndex, 1);
@@ -188,7 +188,7 @@ class JokingHazard extends Game {
         let cardsAreUnique = cardIds.length === (new Set(cardIds)).size;
         let playerHasCards = cardIds.every(i => player.hand.some(pc => pc.id === i));
         if( !cardsAreUnique || !playerHasCards ){
-            return this.sendPlayerMessage(player, 'invalid-cards');
+            return this.sendPlayerMessage(player, 'invalid-cards', player.hand);
         }
 
         player.hand = player.hand.filter(pc => !cardIds.includes(pc.id));
