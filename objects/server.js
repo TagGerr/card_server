@@ -19,7 +19,7 @@ class Server {
             },
             {
                 id: 'lol',
-                name: 'Love Letters',
+                name: 'Love Letter',
             },
             {
                 id: '31',
