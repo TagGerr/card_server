@@ -41,7 +41,7 @@ class Game {
     }
 
     shuffle(objects) {
-        objects = Object.assign([], objects);
+        objects = objects.slice();
         for(let i = objects.length - 1; i > 0; i--){
             let j = Math.floor(Math.random() * (i + 1));
             [objects[i], objects[j]] = [objects[j], objects[i]];
@@ -54,7 +54,7 @@ class Game {
     }
 
     sendPlayerMessage({id: playerId}, message, ...data) {
-        return this.io.to(playerId).emit('game-data', message, ...data);
+        return this.io.sockets.sockets[ playerId ].emit('game-data', message, ...data);
     }
 
     sendRoomMessage(message, ...data) {
