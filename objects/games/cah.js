@@ -67,16 +67,16 @@ class CardsAgainstHumanity extends Game {
     	if(this.playerCount < this.minPlayers){
     		return this.sendPlayerMessage(player, 'start-failed', 'Not enough players');
         }
-    	
+        
+        this.czar = 0;
+        this.whiteDeck = this.shuffle(cards.white);
+        this.blackDeck = this.shuffle(cards.black);
         this.players = this.shuffle(this.players);
 
         this.players.map(p => {
             p.hand = [];
             p.score = 0;
         });
-
-        this.blackDeck = this.shuffle(cards.black);
-        this.whiteDeck = this.shuffle(cards.white);
         
         this.sendRoomMessage('game-started', this.broadcastPlayerData, MAX_POINTS);
 
@@ -130,15 +130,15 @@ class CardsAgainstHumanity extends Game {
         }
 
         if(cards.length < 1){
-            return this.sendPlayerMessage(player, 'no-cards');
+            return this.sendPlayerMessage(player, 'no-cards', player.hand);
         }
 
         let cardIds = cards.map(c => c.id);
 
-        let cardsAreUnique = cardIds.length !== (new Set(cardIds)).length;
+        let cardsAreUnique = cardIds.length === (new Set(cardIds)).size;
         let playerHasCards = cardIds.every(i => player.hand.some(pc => pc.id === i));
         if( !cardsAreUnique || !playerHasCards ){
-            return this.sendPlayerMessage(player, 'invalid-cards');
+            return this.sendPlayerMessage(player, 'invalid-cards', player.hand);
         }
 
         player.hand = player.hand.filter(pc => !cardIds.includes(pc.id));

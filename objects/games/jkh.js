@@ -71,15 +71,15 @@ class JokingHazard extends Game {
     	if(this.playerCount < this.minPlayers){
     		return this.sendPlayerMessage(player, 'start-failed', 'Not enough players');
         }
-    	
+        
+        this.judge = 0;
+        this.deck = this.shuffle(cards);
         this.players = this.shuffle(this.players);
 
         this.players.map(p => {
             p.hand = [];
             p.score = 0;
         });
-
-        this.deck = this.shuffle(cards);
         
         this.sendRoomMessage('game-started', this.broadcastPlayerData, MAX_POINTS);
 
@@ -147,7 +147,7 @@ class JokingHazard extends Game {
 
         let cardIndex = player.hand.findIndex(c => c.id === card.id);
         if(cardIndex === -1){
-            return this.sendPlayerMessage(player, 'invalid-card');
+            return this.sendPlayerMessage(player, 'invalid-card', player.hand);
         }
 
         player.hand.splice(cardIndex, 1);
@@ -185,10 +185,10 @@ class JokingHazard extends Game {
 
         let cardIds = cards.map(c => c.id);
 
-        let cardsAreUnique = cardIds.length !== (new Set(cardIds)).length;
+        let cardsAreUnique = cardIds.length === (new Set(cardIds)).size;
         let playerHasCards = cardIds.every(i => player.hand.some(pc => pc.id === i));
         if( !cardsAreUnique || !playerHasCards ){
-            return this.sendPlayerMessage(player, 'invalid-cards');
+            return this.sendPlayerMessage(player, 'invalid-cards', player.hand);
         }
 
         player.hand = player.hand.filter(pc => !cardIds.includes(pc.id));
