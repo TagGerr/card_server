@@ -183,7 +183,7 @@ class CardsAgainstHumanity extends Game {
             return this.sendPlayerMessage(player, 'invalid-card');
         }
 
-        winningPlayer.score += this.round.blackCard.play;
+        winningPlayer.score += 1;
         this.sendRoomMessage('selected-card', card, winningPlayer);
 
         return this.scoreRound();
