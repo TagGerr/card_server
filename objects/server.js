@@ -59,6 +59,7 @@ class Server {
         this.sendDirectMessage(client, 'welcome', {
             games: this.games,
             suggested_name: generateName(),
+            client_id: client.id
         });
     }
 
