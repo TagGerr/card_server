@@ -171,10 +171,11 @@ class CardsAgainstHumanity extends Game {
             return this.sendPlayerMessage(player, 'not-czar');
         }
 
-        let winningPlayer;
+        let winningPlayer, winningCards;
         for(const [playerId, playedCards] of Object.entries(this.round.playedCards)){
             if( playedCards.some(c => c.id === card.id) ){
                 winningPlayer = this.findPlayerInGame({id: playerId});
+                winningCards = playedCards;
                 break;
             }
         }
@@ -184,7 +185,7 @@ class CardsAgainstHumanity extends Game {
         }
 
         winningPlayer.score += 1;
-        this.sendRoomMessage('selected-card', card, winningPlayer);
+        this.sendRoomMessage('selected-card', winningCards, winningPlayer);
 
         return this.scoreRound();
     }
