@@ -1367,7 +1367,7 @@ module.exports = {
         },
         {
             id: 274,
-            text: "I can drive and ____ at the same time.",
+            text: "I can drive and _ at the same time.",
             play: 1
         },
         {
