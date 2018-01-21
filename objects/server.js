@@ -305,8 +305,25 @@ class Server {
 
     disconnect(client) {
         console.log(`Player ${client.id} has left the game`);
-        this.leaveGame(client);
-        this.players = this.players.filter(p => p.id !== client.id);
+        if(client.player){
+            if(client.player.game && client.player.room){
+                this.sendRoomMessage(client, `${client.player.game.id}_${client.player.room}`, 'player-disconnecting', client.player);
+            }
+    
+            client.player.connected = false;
+            setTimeout(() => {
+                this.players.some((player, idx) => {
+                    if(player.id === client.id){
+                        if(player.connected === false){
+                            this.players.splice(idx, 1);
+                            this.leaveGame(client);
+                        }
+
+                        return true;
+                    }
+                });
+            }, 20 * 1000);
+        }
     }
 
     sendDirectMessage({id: socketId}, message, ...data) {
