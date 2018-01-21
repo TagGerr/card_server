@@ -59,6 +59,34 @@ class CardsAgainstHumanity extends Game {
         }
     }
 
+    handleReconnect(player, oldId) {
+        if( this.round.playedCards.hasOwnProperty(oldId) ){
+            Object.defineProperty(this.round.playedCards, player.id, Object.getOwnPropertyDescriptor(this.round.playedCards, oldId));
+            delete this.round.playedCards[ oldId ];
+        }
+
+        let reconnected = this.players.some(p => {
+            if(p.id === player.id){
+                let gameData = {
+                    players: this.broadcastPlayerData,
+                    maxPoints: MAX_POINTS,
+                    czar: this.players[ this.czar ].id,
+                    blackCard: this.round.blackCard,
+                    hand: p.hand,
+                    selectedCards: this.round.playedCards[ player.id ] || []
+                };
+
+                if(this.state === 'judge'){
+                    let playedCards = Array.from(Object.values(this.round.playedCards));
+                    gameData.playedCards = this.shuffle(playedCards);
+                }
+
+                this.sendPlayerMessage(player, 'game-reconnected', gameData);
+                return true;
+            }
+        });
+    }
+
     prepareGame(player) {
         if(this.state !== 'new' && this.state !== 'end'){
             return this.sendPlayerMessage(player, 'start-failed', `Invalid state: ${this.state}`);

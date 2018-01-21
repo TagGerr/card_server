@@ -14,6 +14,15 @@ class Game {
         return this.players.length;
     }
 
+    updatePlayerId(newId, oldId) {
+        this.players.some(p => {
+            if(p.id === oldId){
+                p.id = newId;
+                return true;
+            }
+        });
+    }
+
     addPlayer(player) {
     	if(this.playerCount >= this.maxPlayers){
     		throw Error('Too many players');

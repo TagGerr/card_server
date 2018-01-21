@@ -63,6 +63,50 @@ class Server {
         });
     }
 
+    attemptPlayerReconnect(client, playerId) {
+        let reconnected = false;
+
+        this.players.some(player => {
+            if(player.id === playerId){
+                if(player.connected === false){
+                    let originalId = player.id;
+                    client.player = Object.assign(player, {id: client.id, connected: true});
+
+                    this.sendDirectMessage(client, 'player-update', client.player);
+
+                    let game = this.findClientGame(client);
+
+                    if(game !== false){
+                        try {
+                            game.updatePlayerId(player.id, originalId);
+                            client.join(game.gameRoom);
+                            this.sendRoomMessage(client, game.gameRoom, 'player-reconnected', {newId: player.id, oldId: originalId});
+
+                            if( game.started ){
+                                game.handleReconnect(client.player, originalId);
+                            } else {
+                                this.sendDirectMessage(client, 'joined-game', game.players);
+                            }
+                        } catch (err) {
+                            this.leaveGame(client);
+                            return this.sendDirectMessage(client, 'reconnect-failed', {message: err.message});
+                        }
+                    } else {
+                        this.sendDirectMessage(client, 'chose-game');
+                        this.sendDirectMessage(client, 'open-games', this.getOpenGames(client.player.game.id));
+                    }
+
+                    reconnected = true;
+                }
+                return true;
+            }
+        });
+
+        if(reconnected === false){
+            this.sendDirectMessage(client, 'reconnect-failed');
+        }
+    }
+
     findClientGame(client) {
         if(typeof client.player === 'undefined' || typeof client.player.game === 'undefined' || typeof client.player.room === 'undefined'){
             return false;
