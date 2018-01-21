@@ -184,10 +184,10 @@ class CardsAgainstHumanity extends Game {
     judgeRound() {
         this.state = 'judge';
 
-        let selectedCards = Array.from(Object.values(this.round.playedCards));
-        selectedCards = this.shuffle(selectedCards);
+        let playedCards = Array.from(Object.values(this.round.playedCards));
+        playedCards = this.shuffle(playedCards);
 
-        this.sendRoomMessage('cards-played', selectedCards);
+        this.sendRoomMessage('cards-played', playedCards);
     }
 
     selectCard(player, card) {
