@@ -49,6 +49,7 @@ class Server {
         });
 
         client
+            .on('reconnect-player', playerId => this.attemptPlayerReconnect(client, playerId))
             .on('send-chat', msg => this.handleChatMessage(client, msg))
             .on('choose-game', (playerName, gameId) => this.chooseGame(client, playerName, gameId))
             .on('create-game', () => this.createGame(client))
@@ -58,8 +59,7 @@ class Server {
 
         this.sendDirectMessage(client, 'welcome', {
             games: this.games,
-            suggested_name: generateName(),
-            client_id: client.id
+            suggested_name: generateName()
         });
     }
 
@@ -68,8 +68,12 @@ class Server {
             return false;
         }
 
-        let game = client.player.game.id;
-        let room = client.player.room;
+        let game = client.player.game.id,
+            room = client.player.room;
+
+        if(typeof this.rooms[ game ] === 'undefined' || typeof this.rooms[ game ][ room ] === 'undefined'){
+            return false;
+        }
 
         return this.rooms[ game ][ room ];
     }

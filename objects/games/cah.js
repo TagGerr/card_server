@@ -63,11 +63,12 @@ class CardsAgainstHumanity extends Game {
         if(this.state !== 'new' && this.state !== 'end'){
             return this.sendPlayerMessage(player, 'start-failed', `Invalid state: ${this.state}`);
         }
-
+        
     	if(this.playerCount < this.minPlayers){
-    		return this.sendPlayerMessage(player, 'start-failed', 'Not enough players');
+            return this.sendPlayerMessage(player, 'start-failed', 'Not enough players');
         }
         
+        this.started = true;
         this.czar = 0;
         this.whiteDeck = this.shuffle(cards.white);
         this.blackDeck = this.shuffle(cards.black);
