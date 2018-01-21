@@ -49,6 +49,7 @@ class Server {
         });
 
         client
+            .on('reconnect-player', playerId => this.attemptPlayerReconnect(client, playerId))
             .on('send-chat', msg => this.handleChatMessage(client, msg))
             .on('choose-game', (playerName, gameId) => this.chooseGame(client, playerName, gameId))
             .on('create-game', () => this.createGame(client))
@@ -58,8 +59,52 @@ class Server {
 
         this.sendDirectMessage(client, 'welcome', {
             games: this.games,
-            suggested_name: generateName(),
+            suggested_name: generateName()
         });
+    }
+
+    attemptPlayerReconnect(client, playerId) {
+        let reconnected = false;
+
+        this.players.some(player => {
+            if(player.id === playerId){
+                if(player.connected === false){
+                    let originalId = player.id;
+                    client.player = Object.assign(player, {id: client.id, connected: true});
+
+                    this.sendDirectMessage(client, 'player-update', client.player);
+
+                    let game = this.findClientGame(client);
+
+                    if(game !== false){
+                        try {
+                            game.updatePlayerId(player.id, originalId);
+                            client.join(game.gameRoom);
+                            this.sendRoomMessage(client, game.gameRoom, 'player-reconnected', {newId: player.id, oldId: originalId});
+
+                            if( game.started ){
+                                game.handleReconnect(client.player, originalId);
+                            } else {
+                                this.sendDirectMessage(client, 'joined-game', game.players);
+                            }
+                        } catch (err) {
+                            this.leaveGame(client);
+                            return this.sendDirectMessage(client, 'reconnect-failed', {message: err.message});
+                        }
+                    } else {
+                        this.sendDirectMessage(client, 'chose-game');
+                        this.sendDirectMessage(client, 'open-games', this.getOpenGames(client.player.game.id));
+                    }
+
+                    reconnected = true;
+                }
+                return true;
+            }
+        });
+
+        if(reconnected === false){
+            this.sendDirectMessage(client, 'reconnect-failed');
+        }
     }
 
     findClientGame(client) {
@@ -67,8 +112,12 @@ class Server {
             return false;
         }
 
-        let game = client.player.game.id;
-        let room = client.player.room;
+        let game = client.player.game.id,
+            room = client.player.room;
+
+        if(typeof this.rooms[ game ] === 'undefined' || typeof this.rooms[ game ][ room ] === 'undefined'){
+            return false;
+        }
 
         return this.rooms[ game ][ room ];
     }
@@ -256,8 +305,25 @@ class Server {
 
     disconnect(client) {
         console.log(`Player ${client.id} has left the game`);
-        this.leaveGame(client);
-        this.players = this.players.filter(p => p.id !== client.id);
+        if(client.player){
+            if(client.player.game && client.player.room){
+                this.sendRoomMessage(client, `${client.player.game.id}_${client.player.room}`, 'player-disconnecting', client.player);
+            }
+    
+            client.player.connected = false;
+            setTimeout(() => {
+                this.players.some((player, idx) => {
+                    if(player.id === client.id){
+                        if(player.connected === false){
+                            this.players.splice(idx, 1);
+                            this.leaveGame(client);
+                        }
+
+                        return true;
+                    }
+                });
+            }, 20 * 1000);
+        }
     }
 
     sendDirectMessage({id: socketId}, message, ...data) {

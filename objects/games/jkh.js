@@ -63,6 +63,39 @@ class JokingHazard extends Game {
         }
     }
 
+    handleReconnect(player, oldId) {
+        if( this.round.playedCards.hasOwnProperty(oldId) ){
+            Object.defineProperty(this.round.playedCards, player.id, Object.getOwnPropertyDescriptor(this.round.playedCards, oldId));
+            delete this.round.playedCards[ oldId ];
+        }
+
+        let reconnected = this.players.some(p => {
+            if(p.id === player.id){
+                let gameData = {
+                    players: this.broadcastPlayerData,
+                    maxPoints: MAX_POINTS,
+                    judge: this.players[ this.judge ].id,
+                    introCard: this.round.introCard,
+                    roundStyle: this.round.style,
+                    hand: p.hand,
+                    selectedCards: this.round.playedCards[ player.id ] || []
+                };
+
+                if(typeof this.round.setupCard !== 'undefined'){
+                    gameData.setupCard = this.round.setupCard;
+                }
+
+                if(this.state === 'judge'){
+                    let playedCards = Array.from(Object.values(this.round.playedCards));
+                    gameData.playedCards = this.shuffle(playedCards);
+                }
+
+                this.sendPlayerMessage(player, 'game-reconnected', gameData);
+                return true;
+            }
+        });
+    }
+
     prepareGame(player) {
         if(this.state !== 'new' && this.state !== 'end'){
             return this.sendPlayerMessage(player, 'start-failed', `Invalid state: ${this.state}`);
@@ -72,6 +105,7 @@ class JokingHazard extends Game {
     		return this.sendPlayerMessage(player, 'start-failed', 'Not enough players');
         }
         
+        this.started = true;
         this.judge = 0;
         this.deck = this.shuffle(cards);
         this.players = this.shuffle(this.players);
@@ -151,7 +185,7 @@ class JokingHazard extends Game {
         }
 
         player.hand.splice(cardIndex, 1);
-        this.round.setupCard = card;
+        this.round.setupCard = {card: card, position: position};
 
         this.state = 'play';
 
@@ -159,7 +193,7 @@ class JokingHazard extends Game {
             if(idx === this.judge){
                 this.sendPlayerMessage(p, 'judge-wait');
             } else {
-                this.sendPlayerMessage(p, 'joke-setup', this.round.setupCard, position);
+                this.sendPlayerMessage(p, 'joke-setup', this.round.setupCard);
             }
         });
     }

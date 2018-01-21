@@ -7,10 +7,20 @@ class Game {
         this.players = [];
 
         this.announce = announce;
+        this.started = false;
     }
 
     get playerCount() {
         return this.players.length;
+    }
+
+    updatePlayerId(newId, oldId) {
+        this.players.some(p => {
+            if(p.id === oldId){
+                p.id = newId;
+                return true;
+            }
+        });
     }
 
     addPlayer(player) {
@@ -38,6 +48,10 @@ class Game {
 
     findPlayerInGame({id: playerId}) {
         return this.players.find(p => p.id === playerId);
+    }
+
+    handleReconnect() {
+        throw new Error('Game does not implement reconnecting');
     }
 
     shuffle(objects) {

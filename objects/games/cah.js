@@ -59,15 +59,44 @@ class CardsAgainstHumanity extends Game {
         }
     }
 
+    handleReconnect(player, oldId) {
+        if( this.round.playedCards.hasOwnProperty(oldId) ){
+            Object.defineProperty(this.round.playedCards, player.id, Object.getOwnPropertyDescriptor(this.round.playedCards, oldId));
+            delete this.round.playedCards[ oldId ];
+        }
+
+        let reconnected = this.players.some(p => {
+            if(p.id === player.id){
+                let gameData = {
+                    players: this.broadcastPlayerData,
+                    maxPoints: MAX_POINTS,
+                    czar: this.players[ this.czar ].id,
+                    blackCard: this.round.blackCard,
+                    hand: p.hand,
+                    selectedCards: this.round.playedCards[ player.id ] || []
+                };
+
+                if(this.state === 'judge'){
+                    let playedCards = Array.from(Object.values(this.round.playedCards));
+                    gameData.playedCards = this.shuffle(playedCards);
+                }
+
+                this.sendPlayerMessage(player, 'game-reconnected', gameData);
+                return true;
+            }
+        });
+    }
+
     prepareGame(player) {
         if(this.state !== 'new' && this.state !== 'end'){
             return this.sendPlayerMessage(player, 'start-failed', `Invalid state: ${this.state}`);
         }
-
+        
     	if(this.playerCount < this.minPlayers){
-    		return this.sendPlayerMessage(player, 'start-failed', 'Not enough players');
+            return this.sendPlayerMessage(player, 'start-failed', 'Not enough players');
         }
         
+        this.started = true;
         this.czar = 0;
         this.whiteDeck = this.shuffle(cards.white);
         this.blackDeck = this.shuffle(cards.black);
@@ -155,10 +184,10 @@ class CardsAgainstHumanity extends Game {
     judgeRound() {
         this.state = 'judge';
 
-        let selectedCards = Array.from(Object.values(this.round.playedCards));
-        selectedCards = this.shuffle(selectedCards);
+        let playedCards = Array.from(Object.values(this.round.playedCards));
+        playedCards = this.shuffle(playedCards);
 
-        this.sendRoomMessage('cards-played', selectedCards);
+        this.sendRoomMessage('cards-played', playedCards);
     }
 
     selectCard(player, card) {
@@ -171,10 +200,11 @@ class CardsAgainstHumanity extends Game {
             return this.sendPlayerMessage(player, 'not-czar');
         }
 
-        let winningPlayer;
+        let winningPlayer, winningCards;
         for(const [playerId, playedCards] of Object.entries(this.round.playedCards)){
             if( playedCards.some(c => c.id === card.id) ){
                 winningPlayer = this.findPlayerInGame({id: playerId});
+                winningCards = playedCards;
                 break;
             }
         }
@@ -183,8 +213,8 @@ class CardsAgainstHumanity extends Game {
             return this.sendPlayerMessage(player, 'invalid-card');
         }
 
-        winningPlayer.score += this.round.blackCard.play;
-        this.sendRoomMessage('selected-card', card, winningPlayer);
+        winningPlayer.score += 1;
+        this.sendRoomMessage('selected-card', winningCards, winningPlayer);
 
         return this.scoreRound();
     }

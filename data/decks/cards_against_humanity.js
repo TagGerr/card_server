@@ -462,7 +462,7 @@ module.exports = {
         },
         {
             id: 93,
-            text: "Dear Sir or Madam, We regret to inform you that the Office of _ has denied your request for _",
+            text: "Dear Sir or Madam, We regret to inform you that the Office of _ has denied your request for _.",
             play: 2
         },
         {
@@ -702,7 +702,7 @@ module.exports = {
         },
         {
             id: 141,
-            text: "Alightment: Chaotic _",
+            text: "Alightment: Chaotic _.",
             play: 1
         },
         {
@@ -712,7 +712,7 @@ module.exports = {
         },
         {
             id: 143,
-            text: "What made the paladin fall? _",
+            text: "What made the paladin fall?",
             play: 1
         },
         {
@@ -1152,7 +1152,7 @@ module.exports = {
         },
         {
             id: 231,
-            text: "My new porn DVD was completely ruined by the inclusion of _",
+            text: "My new porn DVD was completely ruined by the inclusion of _.",
             play: 1
         },
         {
@@ -1172,7 +1172,7 @@ module.exports = {
         },
         {
             id: 235,
-            text: "My new favourite sexual position is _",
+            text: "My new favourite sexual position is _.",
             play: 1
         },
         {
@@ -1317,7 +1317,7 @@ module.exports = {
         },
         {
             id: 264,
-            text: "Terminator 4: _",
+            text: "Terminator 4: _.",
             play: 1
         },
         {
@@ -1367,7 +1367,7 @@ module.exports = {
         },
         {
             id: 274,
-            text: "I can drive and ____ at the same time.",
+            text: "I can drive and _ at the same time.",
             play: 1
         },
         {
