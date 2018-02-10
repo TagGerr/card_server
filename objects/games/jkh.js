@@ -233,6 +233,8 @@ class JokingHazard extends Game {
 
         this.round.playedCards[ player.id ] = cards;
 
+        this.sendRoomMessage('cards-chosen', {id: player.id, name: player.name});
+
         let playersPlayed = Object.keys(this.round.playedCards);
         let allPlayersPlayed = this.players.every((p, idx) => playersPlayed.includes(p.id) || idx === this.judge);
         if( allPlayersPlayed ){
