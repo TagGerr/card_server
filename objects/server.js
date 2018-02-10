@@ -42,7 +42,11 @@ class Server {
             if(packet[0] == 'game-event'){
                 let game = this.findClientGame(client);
                 if( game ){
-                    return game.handleGameEvent(client.player, ...packet.slice(1));
+                    let result = game.handleGameEvent(client.player, ...packet.slice(1));
+                    if(packet[1] === 'start'){
+                        this.announceOpenGames(client.player.game.id);
+                    }
+                    return result;
                 }
             }
             next();

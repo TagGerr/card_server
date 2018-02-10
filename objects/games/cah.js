@@ -51,6 +51,9 @@ class CardsAgainstHumanity extends Game {
     }
 
     addPlayer(player) {
+        if(this.state !== 'new'){
+            throw Error('Cannot join a game in progress');
+        }
         super.addPlayer(player);
         if(this.state === 'paused'){
             if(this.playerCount >= this.minPlayers){
@@ -97,6 +100,7 @@ class CardsAgainstHumanity extends Game {
         }
         
         this.started = true;
+        this.announce = false;
         this.czar = 0;
         this.whiteDeck = this.shuffle(cards.white);
         this.blackDeck = this.shuffle(cards.black);
