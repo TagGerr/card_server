@@ -120,23 +120,28 @@ class LoveLetters extends Game {
         return this.sendPlayerMessage(player, 'your-turn', drawCard);
     }
 
-    playCard(player, card) {
+    playCard(player, card, callback) {
         player = this.findPlayerInGame(player);
         if(player !== this.players[ this.activePlayer ]){
+            callback(false);
             return this.sendPlayerMessage(player, 'not-your-turn');
         }
 
         let playerHasCard = player.cards.some(pc => pc.id === card.id);
         if( !playerHasCard ){
+            callback(false);
             return this.sendPlayerMessage(player, 'invalid-card', 'Player does not have that card');
         }
 
         if(player.cards.some(c => c.type === 'countess') && card.type !== 'countess' && ['king', 'prince'].some(t => card.type === t)){
+            callback(false);
             return this.sendPlayerMessage(player, 'invalid-card', 'Player must discard the Countess when they have the King or Prince');
         }
 
         player.cards = player.cards.filter(c => c.id !== card.id);
         player.discards.push(card);
+
+        callback(true);
 
         switch(card.type){
             case 'guard':
@@ -240,8 +245,8 @@ class LoveLetters extends Game {
                         };
                     };
                 
-                this.sendPlayerMessage(player, 'baron-view', target, targetPlayer.cards[0], acknowledge(target));
-                this.sendPlayerMessage(target, 'baron-view', this.displayPlayer(player), player.cards[0], acknowledge(player));
+                this.sendPlayerMessage(player, 'baron-view', target, targetPlayer.cards[0], acknowledge(player));
+                this.sendPlayerMessage(target, 'baron-view', this.displayPlayer(player), player.cards[0], acknowledge(target));
             };
 
         
@@ -258,8 +263,10 @@ class LoveLetters extends Game {
             callback = target => {
                 let targetPlayer = this.findPlayerInGame(target);
                 this.discardCard(targetPlayer, true);
-                this.sendRoomMessage('prince-replace', this.displayPlayer(player), target);
-                return this.nextPlayer();
+                this.sendPlayerMessage(targetPlayer, 'prince-picked', this.displayPlayer(player), targetPlayer.cards, () => {
+                    this.sendRoomMessage('prince-replace', this.displayPlayer(player), target);
+                    return this.nextPlayer();
+                });
             };
         
         if(targets.length < 1){
@@ -273,12 +280,26 @@ class LoveLetters extends Game {
     playKing(player) {
         let targets = this.getAvailableTargets(),
             callback = target => {
-                let targetPlayer = this.findPlayerInGame;
+                let targetPlayer = this.findPlayerInGame(target),
+                    playerDisplay = this.displayPlayer(player),
+                    targetDisplay = this.displayPlayer(targetPlayer);
+
                 [player.cards, targetPlayer.cards] = [targetPlayer.cards, player.cards];
-                this.sendPlayerMessage(player, 'king-card', player.cards);
-                this.sendPlayerMessage(targetPlayer, 'king-card', targetPlayer.cards);
-                this.sendRoomMessage('king-swap', this.displayPlayer(player), target);
-                return this.nextPlayer();
+
+                let acks = new Set(),
+                    acknowledge = ({id: playerId}) => {
+                        return () => {
+                            acks.add(playerId);
+
+                            if(acks.size === 2){
+                                this.sendRoomMessage('king-swap', playerDisplay, targetDisplay);
+                                return this.nextPlayer();
+                            }
+                        };
+                    };
+
+                this.sendPlayerMessage(player, 'king-card', playerDisplay, targetDisplay, player.cards, acknowledge(player));
+                this.sendPlayerMessage(target, 'king-card', playerDisplay, targetDisplay, targetPlayer.cards, acknowledge(targetPlayer));
             };
             
         if(targets.length < 1){
@@ -290,16 +311,13 @@ class LoveLetters extends Game {
     }
 
     discardCard(player, canRedraw = false) {
-        let playerCard = player.cards.splice(0, 1);
+        let playerCard = player.cards.shift();
         player.discards.push(playerCard);
 
         if(playerCard.type === 'princess'){
-            canRedraw = false;
             player.isPlaying = false;
             this.sendRoomMessage('princess-purge', this.displayPlayer(player));
-        }
-
-        if( canRedraw ){
+        } else if( canRedraw ){
             let newCard = (this.deck.length > 0) ? this.dealCard(this.deck) : this.burnedCard;
             player.cards.push(newCard);
         }
@@ -363,7 +381,7 @@ class LoveLetters extends Game {
                         this.sendRoomMessage('player-round-ready', this.displayPlayer(player));
 
                         if(acks.size === this.playerCount){
-                            this.activePlayer -= 1;
+                            this.activePlayer = this.players.findIndex(p => p.id === winner.id) - 1;
                             this.dealPlayerCards();
                         }
                     };
