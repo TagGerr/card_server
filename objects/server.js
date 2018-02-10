@@ -16,18 +16,18 @@ class Server {
             {
                 id: 'jkh',
                 name: 'Joking Hazard',
-            },
-            {
-                id: 'lol',
-                name: 'Love Letter',
-            },
-            {
-                id: '31',
-                name: 'Thirty-One',
-            },
-            {
-                id: 'ava',
-                name: 'Avalon',
+//            },
+//            {
+//                id: 'lol',
+//                name: 'Love Letter',
+//            },
+//            {
+//                id: '31',
+//                name: 'Thirty-One',
+//            },
+//            {
+//                id: 'ava',
+//                name: 'Avalon',
             }
         ];
         this.gameKeys = this.games.map(g => g.id);
@@ -42,7 +42,11 @@ class Server {
             if(packet[0] == 'game-event'){
                 let game = this.findClientGame(client);
                 if( game ){
-                    return game.handleGameEvent(client.player, ...packet.slice(1));
+                    let result = game.handleGameEvent(client.player, ...packet.slice(1));
+                    if(packet[1] === 'start'){
+                        this.announceOpenGames(client.player.game.id);
+                    }
+                    return result;
                 }
             }
             next();

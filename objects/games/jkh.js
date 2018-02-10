@@ -55,6 +55,9 @@ class JokingHazard extends Game {
     }
 
     addPlayer(player) {
+        if(this.state !== 'new'){
+            throw Error('Cannot join a game in progress');
+        }
         super.addPlayer(player);
         if(this.state === 'paused'){
             if(this.playerCount >= this.minPlayers){
@@ -106,6 +109,7 @@ class JokingHazard extends Game {
         }
         
         this.started = true;
+        this.announce = false;
         this.judge = 0;
         this.deck = this.shuffle(cards);
         this.players = this.shuffle(this.players);
@@ -228,6 +232,8 @@ class JokingHazard extends Game {
         player.hand = player.hand.filter(pc => !cardIds.includes(pc.id));
 
         this.round.playedCards[ player.id ] = cards;
+
+        this.sendRoomMessage('cards-chosen', {id: player.id, name: player.name});
 
         let playersPlayed = Object.keys(this.round.playedCards);
         let allPlayersPlayed = this.players.every((p, idx) => playersPlayed.includes(p.id) || idx === this.judge);

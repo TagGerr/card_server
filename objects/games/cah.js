@@ -51,6 +51,9 @@ class CardsAgainstHumanity extends Game {
     }
 
     addPlayer(player) {
+        if(this.state !== 'new'){
+            throw Error('Cannot join a game in progress');
+        }
         super.addPlayer(player);
         if(this.state === 'paused'){
             if(this.playerCount >= this.minPlayers){
@@ -97,6 +100,7 @@ class CardsAgainstHumanity extends Game {
         }
         
         this.started = true;
+        this.announce = false;
         this.czar = 0;
         this.whiteDeck = this.shuffle(cards.white);
         this.blackDeck = this.shuffle(cards.black);
@@ -173,6 +177,8 @@ class CardsAgainstHumanity extends Game {
         player.hand = player.hand.filter(pc => !cardIds.includes(pc.id));
 
         this.round.playedCards[ player.id ] = cards;
+
+        this.sendRoomMessage('cards-chosen', {id: player.id, name: player.name});
 
         let playersPlayed = Object.keys(this.round.playedCards);
         let allPlayersPlayed = this.players.every((p, idx) => playersPlayed.includes(p.id) || idx === this.czar);
