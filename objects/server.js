@@ -16,18 +16,18 @@ class Server {
             {
                 id: 'jkh',
                 name: 'Joking Hazard',
-            },
-            {
-                id: 'lol',
-                name: 'Love Letter',
-            },
-            {
-                id: '31',
-                name: 'Thirty-One',
-            },
-            {
-                id: 'ava',
-                name: 'Avalon',
+//            },
+//            {
+//                id: 'lol',
+//                name: 'Love Letter',
+//            },
+//            {
+//                id: '31',
+//                name: 'Thirty-One',
+//            },
+//            {
+//                id: 'ava',
+//                name: 'Avalon',
             }
         ];
         this.gameKeys = this.games.map(g => g.id);
