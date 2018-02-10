@@ -244,11 +244,10 @@ class Server {
         
         console.log(`${client.player.name} would like to join room ${room} in game ${game}`);
 
-        client.join(gameRoom);
-        client.player.room = room;
-        
         try {
-        	this.rooms[ game ][ room ].addPlayer(client.player);
+            this.rooms[ game ][ room ].addPlayer(client.player);
+            client.join(gameRoom);
+            client.player.room = room;
         } catch (err) {
         	return this.sendDirectMessage(client, 'join-failed', {message: err.message});
         }
