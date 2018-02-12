@@ -45,11 +45,27 @@ class JokingHazard extends Game {
     }
 
     removePlayer(player) {
+        let playerIndex = this.players.findIndex(p => p.id === player.id);
         super.removePlayer(player);
-        if(this.state !== 'new'){
+
+        if(this.state === 'end'){
+            return;
+        } else if(this.state !== 'new'){
             if(this.playerCount < this.minPlayers){
-                this.pausedState = this.state;
-                this.state = 'paused';
+                let highScore = Math.max.apply(Math, this.players.map(p => p.score)),
+                    winningPlayers = this.players.filter(p => p.score === highScore);
+                this.endGame.apply(this, winningPlayers);
+            } else {
+                if(playerIndex === this.judge){
+                    this.sendRoomMessage('judge-left');
+                    if(this.judge >= this.playerCount){
+                        this.judge = 0;
+                    }
+                    return this.startRound();
+                } else {
+                    delete this.round.playedCards[ player.id ];
+                    this.checkPlayedCards();
+                }
             }
         }
     }
@@ -235,6 +251,10 @@ class JokingHazard extends Game {
 
         this.sendRoomMessage('cards-chosen', {id: player.id, name: player.name});
 
+        this.checkPlayedCards();
+    }
+
+    checkPlayedCards() {
         let playersPlayed = Object.keys(this.round.playedCards);
         let allPlayersPlayed = this.players.every((p, idx) => playersPlayed.includes(p.id) || idx === this.judge);
         if( allPlayersPlayed ){
@@ -300,10 +320,10 @@ class JokingHazard extends Game {
         }
     }
 
-    endGame(player) {
+    endGame(...players) {
         this.state = 'end';
 
-        this.sendRoomMessage('player-wins', player);
+        this.sendRoomMessage('game-won', players);
         return true;
     }
 }

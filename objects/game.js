@@ -68,6 +68,9 @@ class Game {
     }
 
     sendPlayerMessage({id: playerId}, message, ...data) {
+        if(typeof this.io.sockets.sockets[ playerId ] === 'undefined'){
+            return;
+        }
         return this.io.sockets.sockets[ playerId ].emit('game-data', message, ...data);
     }
 
