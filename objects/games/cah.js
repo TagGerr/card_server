@@ -28,6 +28,10 @@ class CardsAgainstHumanity extends Game {
                 this.prepareGame(player);
                 break;
 
+            case 'trash-cards':
+                this.trashCards(player, ...data);
+                break;
+
             case 'play-card':
                 this.playCard(player, ...data);
                 break;
@@ -173,6 +177,29 @@ class CardsAgainstHumanity extends Game {
             });
         }
         return;
+    }
+
+    trashCards(player) {
+        if(this.state !== 'play'){
+            return this.sendPlayerMessage(player, 'invalid-state');
+        }
+
+        player = this.findPlayerInGame(player);
+
+        if(player === this.players[ this.czar ]){
+            return this.sendPlayerMessage(player, 'czar-no-trash');
+        }
+
+        if(typeof this.round.playedCards[ player.id ] !== 'undefined'){
+            return this.sendPlayerMessage(player, 'already-played');
+        }
+
+        player.hand = [];
+        while(player.hand.length < CARDS_PER_HAND){
+            player.hand.push(this.dealCard(this.whiteDeck));
+        }
+
+        this.sendPlayerMessage(player, 'cards-dealt', this.round.blackCard, player.hand);
     }
 
     playCard(player, cards) {
