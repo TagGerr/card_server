@@ -5,12 +5,13 @@ const MAX_POINTS = 5;
 const CARDS_PER_HAND = 10;
 
 class CardsAgainstHumanity extends Game {
-    constructor(io, gameRoom, announce = true) {
+    constructor(io, gameRoom, {announce = true, points = MAX_POINTS}) {
         super(io, gameRoom, 3, 10, announce);
 
         this.czar = 0;
         this.state = 'new';
         this.pausedState = null;
+        this.maxPoints = points;
 
         this.round = {};
     }
@@ -95,7 +96,7 @@ class CardsAgainstHumanity extends Game {
             if(p.id === player.id){
                 let gameData = {
                     players: this.broadcastPlayerData,
-                    maxPoints: MAX_POINTS,
+                    maxPoints: this.maxPoints,
                     czar: this.players[ this.czar ].id,
                     blackCard: this.round.blackCard,
                     hand: p.hand,
@@ -134,7 +135,7 @@ class CardsAgainstHumanity extends Game {
             p.score = 0;
         });
         
-        this.sendRoomMessage('game-started', this.broadcastPlayerData, MAX_POINTS);
+        this.sendRoomMessage('game-started', this.broadcastPlayerData, this.maxPoints);
 
         this.startRound();
     }
@@ -262,7 +263,7 @@ class CardsAgainstHumanity extends Game {
         this.sendRoomMessage('update-scores', this.broadcastPlayerData);
 
         let gameOver = this.players.some(p => {
-            if(p.score >= MAX_POINTS){
+            if(p.score >= this.maxPoints){
                 return this.endGame(p);
             }
         });

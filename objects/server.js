@@ -56,7 +56,7 @@ class Server {
             .on('reconnect-player', playerId => this.attemptPlayerReconnect(client, playerId))
             .on('send-chat', msg => this.handleChatMessage(client, msg))
             .on('choose-game', (playerName, gameId) => this.chooseGame(client, playerName, gameId))
-            .on('create-game', () => this.createGame(client))
+            .on('create-game', options => this.createGame(client, options))
             .on('join-game', room => this.joinGame(client, room))
             .on('leave-game', () => this.leaveGame(client))
             .on('disconnect', () => this.disconnect(client));
@@ -199,7 +199,7 @@ class Server {
         this.sendDirectMessage(client, 'open-games', this.getOpenGames(gameId));
     }
 
-    createGame(client) {
+    createGame(client, options) {
         let game = client.player.game.id,
             gameTitle = this.games.find(g => g.id === game).name;
 
@@ -220,7 +220,7 @@ class Server {
 
         console.log(`${gameTitle} can now be played in room ${room}`);
 
-        let gameObj = new gameObjects[ game ](this.io, gameRoom);
+        let gameObj = new gameObjects[ game ](this.io, gameRoom, options);
         gameObj.addPlayer(client.player);
 
         this.rooms[ game ][ room ] = gameObj;
