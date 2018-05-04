@@ -45,7 +45,7 @@ class CardsAgainstHumanity extends Game {
         let playerIndex = this.players.findIndex(p => p.id === player.id);
         super.removePlayer(player);
 
-        if(this.state !== 'new'){
+        if(this.state !== 'new' && this.state !== 'end'){
             if(this.playerCount < this.minPlayers){
                 this.pausedState = this.state;
                 this.state = 'paused';
