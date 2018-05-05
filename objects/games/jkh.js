@@ -5,12 +5,13 @@ const MAX_POINTS = 5;
 const CARDS_PER_HAND = 7;
 
 class JokingHazard extends Game {
-    constructor(io, gameRoom, {announce = true}) {
+    constructor(io, gameRoom, {announce = true, points = MAX_POINTS} = {}) {
         super(io, gameRoom, 3, 10, announce);
 
         this.judge = 0;
         this.state = 'new';
         this.pausedState = null;
+        this.maxPoints = points;
 
         this.round = {};
     }
@@ -25,6 +26,10 @@ class JokingHazard extends Game {
         switch(eventName){
             case 'start':
                 this.prepareGame(player);
+                break;
+            
+            case 'trash-cards':
+                this.trashCards(player, ...data);
                 break;
 
             case 'setup-comic':
@@ -92,7 +97,7 @@ class JokingHazard extends Game {
             if(p.id === player.id){
                 let gameData = {
                     players: this.broadcastPlayerData,
-                    maxPoints: MAX_POINTS,
+                    maxPoints: this.maxPoints,
                     judge: this.players[ this.judge ].id,
                     introCard: this.round.introCard,
                     roundStyle: this.round.style,
@@ -135,7 +140,7 @@ class JokingHazard extends Game {
             p.score = 0;
         });
         
-        this.sendRoomMessage('game-started', this.broadcastPlayerData, MAX_POINTS);
+        this.sendRoomMessage('game-started', this.broadcastPlayerData, this.maxPoints);
 
         this.startRound();
     }
@@ -183,6 +188,25 @@ class JokingHazard extends Game {
             });
         }
         return;
+    }
+
+    trashCards(player) {
+        if(this.state !== 'play'){
+            return this.sendPlayerMessage(player, 'invalid-state');
+        }
+
+        player = this.findPlayerInGame(player);
+
+        if(typeof this.round.playedCards[ player.id ] !== 'undefined'){
+            return this.sendPlayerMessage(player, 'already-played');
+        }
+
+        player.hand = [];
+        while(player.hand.length < CARDS_PER_HAND){
+            player.hand.push(this.dealCard(this.deck));
+        }
+
+        this.sendPlayerMessage(player, 'cards-dealt', player.hand);
     }
 
     setupComic(player, card, position = 'before') {
@@ -310,7 +334,7 @@ class JokingHazard extends Game {
         this.sendRoomMessage('update-scores', this.broadcastPlayerData);
 
         let gameOver = this.players.some(p => {
-            if(p.score >= MAX_POINTS){
+            if(p.score >= this.maxPoints){
                 return this.endGame(p);
             }
         });

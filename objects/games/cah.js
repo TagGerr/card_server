@@ -5,7 +5,7 @@ const MAX_POINTS = 5;
 const CARDS_PER_HAND = 10;
 
 class CardsAgainstHumanity extends Game {
-    constructor(io, gameRoom, {announce, points} = {announce: true, points: MAX_POINTS}) {
+    constructor(io, gameRoom, {announce = true, points = MAX_POINTS} = {}) {
         super(io, gameRoom, 3, 10, announce);
 
         this.czar = 0;
