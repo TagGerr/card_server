@@ -191,7 +191,7 @@ class JokingHazard extends Game {
     }
 
     trashCards(player) {
-        if(this.state !== 'play'){
+        if(['play', 'setup'].includes(this.state) === false){
             return this.sendPlayerMessage(player, 'invalid-state');
         }
 
