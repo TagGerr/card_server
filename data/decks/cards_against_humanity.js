@@ -1374,6 +1374,51 @@ module.exports = {
             id: 275,
             text: "_ ain't nothin' to fuck wit'!",
             play: 1
+        },
+        {
+            id: 276,
+            text: "In an attempt to reach a wider audience, the Royal Ontario Museum has opened an interactive exhibit on _.",
+            play: 1
+        },
+        {
+            id: 277,
+            text: "What's the Canadian government using to inspire rural students to suceed?",
+            play: 1
+        },
+        {
+            id: 278,
+            text: "In the next Bob and Doug McKenzie adventure, they have to find _ to uncover a sinister plot involving _ and _.",
+            play: 3
+        },
+        {
+            id: 279,
+            text: "Air canada guidelines now prohibit _ on airplanes.",
+            play: 1
+        },
+        {
+            id: 280,
+            text: "CTV presents _, the store of _.",
+            play: 2
+        },
+        {
+            id: 281,
+            text: "In Vancouver it is now legal to _.",
+            play: 1
+        },
+        {
+            id: 282,
+            text: "O Canada, we stand on guard for _.",
+            play: 1
+        },
+        {
+            id: 283,
+            text: "If _ came in two-fours, Canada would be more _.",
+            play: 2
+        },
+        {
+            id: 284,
+            text: "After unifying the GST and PST, the Government can now afford to provide _ for _.",
+            play: 2
         }
     ],
     white: [
@@ -5564,6 +5609,114 @@ module.exports = {
         {
             id: 1047,
             text: "Lightsaber Dildos"
+        },
+        {
+            id: 1048,
+            text: "Snotsicles"
+        },
+        {
+            id: 1049,
+            text: "Naked News."
+        },
+        {
+            id: 1050,
+            text: "Done Cherry's wardrobe."
+        },
+        {
+            id: 1051,
+            text: "Syrupy sex with a maple tree."
+        },
+        {
+            id: 1052,
+            text: "Terry Fox's prosthetic leg."
+        },
+        {
+            id: 1053,
+            text: "Canada: American's hat."
+        },
+        {
+            id: 1054,
+            text: "Homo milk."
+        },
+        {
+            id: 1055,
+            text: "Mr. Dressup."
+        },
+        {
+            id: 1056,
+            text: "The Front de Libération du Québec."
+        },
+        {
+            id: 1057,
+            text: "Heritage minutes."
+        },
+        {
+            id: 1058,
+            text: "The Royal Canadian Mounted Police"
+        },
+        {
+            id: 1059,
+            text: "Stephen Harper"
+        },
+        {
+            id: 1060,
+            text: "Burning down the White House."
+        },
+        {
+            id: 1061,
+            text: "Being Canadian"
+        },
+        {
+            id: 1062,
+            text: "The Famous Five."
+        },
+        {
+            id: 1063,
+            text: "A Molson muscle."
+        },
+        {
+            id: 1064,
+            text: "An icy hand job from an Edmonton hooker."
+        },
+        {
+            id: 1065,
+            text: "Poutine"
+        },
+        {
+            id: 1066,
+            text: "Schmirler the Curler."
+        },
+        {
+            id: 1067,
+            text: "The Official Languages Act. La Loi sure les langues officielles."
+        },
+        {
+            id: 1068,
+            text: "Newfies."
+        },
+        {
+            id: 1069,
+            text: "The CBC."
+        },
+        {
+            id: 1070,
+            text: "Graham Greene playing the same First Nations character on every TV show."
+        },
+        {
+            id: 1071,
+            text: "Killing a moose with your bare hands."
+        },
+        {
+            id: 1072,
+            text: "Tim Hortons."
+        },
+        {
+            id: 1073,
+            text: "Quintland."
+        },
+        {
+            id: 1074,
+            text: "Karla Momolka."
         }
     ]
 };
