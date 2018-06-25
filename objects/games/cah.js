@@ -49,16 +49,11 @@ class CardsAgainstHumanity extends Game {
         let playerIndex = this.players.findIndex(p => p.id === player.id);
         super.removePlayer(player);
 
-        if(this.state !== 'new' && this.state !== 'end'){
-            if(this.playerCount < this.minPlayers){
-                this.pausedState = this.state;
-                this.state = 'paused';
-            }
-        }
-
         if(this.state === 'end'){
             return;
-        } else if(this.state !== 'new'){
+        }
+
+        if(this.state !== 'new'){
             if(this.playerCount < this.minPlayers){
                 let highScore = Math.max.apply(Math, this.players.map(p => p.score)),
                     winningPlayers = this.players.filter(p => p.score === highScore);

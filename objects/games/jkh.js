@@ -55,7 +55,9 @@ class JokingHazard extends Game {
 
         if(this.state === 'end'){
             return;
-        } else if(this.state !== 'new'){
+        }
+        
+        if(this.state !== 'new'){
             if(this.playerCount < this.minPlayers){
                 let highScore = Math.max.apply(Math, this.players.map(p => p.score)),
                     winningPlayers = this.players.filter(p => p.score === highScore);
