@@ -53,9 +53,10 @@ class LoveLetters extends Game {
     		return this.sendPlayerMessage(player, 'start-failed', 'Not enough players');
         }
 
+        this.announce = false;
         this.players = this.shuffle(this.players);
 
-        this.players.map(p => {
+        this.players.forEach(p => {
             p.cards = [];
             p.affection = 0;
         });
@@ -73,7 +74,7 @@ class LoveLetters extends Game {
         this.burnedCard = this.dealCard(this.deck);
         this.court = [];
 
-        this.players.map(p => {
+        this.players.forEach(p => {
             p.cards = [];
             p.cards.push(this.dealCard(this.deck));
             p.discards = [];
@@ -83,7 +84,7 @@ class LoveLetters extends Game {
         });
 
         if(this.playerCount === 2){
-            for(let i = 0; i < 3; i++){
+            while(this.court.length < 3){
                 this.court.push(this.dealCard(this.deck));
             }
             this.sendRoomMessage('court-deal', this.court);
@@ -93,8 +94,7 @@ class LoveLetters extends Game {
     }
 
     nextPlayer() {
-        let player,
-            lastPlayer = this.activePlayer;
+        let player;
         
         if(this.players.filter(p => p.isPlaying).length <= 1){
             return this.scoreRound();
@@ -117,6 +117,8 @@ class LoveLetters extends Game {
 
         let drawCard = this.dealCard(this.deck);
         player.cards.push(drawCard);
+
+        this.sendRoomMessage('player-turn', this.displayPlayer(player));
         return this.sendPlayerMessage(player, 'your-turn', drawCard);
     }
 
@@ -127,21 +129,23 @@ class LoveLetters extends Game {
             return this.sendPlayerMessage(player, 'not-your-turn');
         }
 
-        let playerHasCard = player.cards.some(pc => pc.id === card.id);
+        const playerHasCard = player.cards.some(pc => pc.id === card.id);
         if( !playerHasCard ){
             callback(false);
-            return this.sendPlayerMessage(player, 'invalid-card', 'Player does not have that card');
+            return this.sendPlayerMessage(player, 'invalid-card', 'You do not have that card');
         }
 
         if(player.cards.some(c => c.type === 'countess') && card.type !== 'countess' && ['king', 'prince'].some(t => card.type === t)){
             callback(false);
-            return this.sendPlayerMessage(player, 'invalid-card', 'Player must discard the Countess when they have the King or Prince');
+            return this.sendPlayerMessage(player, 'invalid-card', 'You must discard the Countess when you have the King or Prince');
         }
 
         player.cards = player.cards.filter(c => c.id !== card.id);
         player.discards.push(card);
 
         callback(true);
+
+        this.sendRoomMessage('player-update', this.displayPlayer(player));
 
         switch(card.type){
             case 'guard':
@@ -182,15 +186,17 @@ class LoveLetters extends Game {
     }
 
     playGuard(player) {
-        let targets = this.getAvailableTargets(),
+        const targets = this.getAvailableTargets(),
             callback = (target, guess) => {
-                let targetPlayer = this.findPlayerInGame(target);
+                const targetPlayer = this.findPlayerInGame(target);
+                let message = 'guard-incorrect';
+
                 if(targetPlayer.cards[0].type === guess.type){
                     this.discardCard(targetPlayer);
-                    this.sendRoomMessage('guard-correct', this.displayPlayer(player), target, guess);
-                } else {
-                    this.sendRoomMessage('guard-incorrect', this.displayPlayer(player), target, guess);
+                    message = 'guard-correct';
                 }
+
+                this.sendRoomMessage(message, this.displayPlayer(player), target, guess);
                 return this.nextPlayer();
             };
 
@@ -199,13 +205,13 @@ class LoveLetters extends Game {
             return this.nextPlayer();
         }
 
-        this.sendPlayerMessage(player, 'guard-guess', this.getAvailableTargets(), this.getCardTypes(), callback);
+        this.sendPlayerMessage(player, 'guard-guess', targets, this.getCardTypes(), callback);
     }
 
     playPriest(player) {
-        let targets = this.getAvailableTargets(),
+        const targets = this.getAvailableTargets(),
             callback = target => {
-                let targetPlayer = this.findPlayerInGame(target),
+                const targetPlayer = this.findPlayerInGame(target),
                     acknowledge = () => {
                         this.sendRoomMessage('priest-viewed', this.displayPlayer(player), target);
                         return this.nextPlayer();
@@ -223,29 +229,35 @@ class LoveLetters extends Game {
     }
     
     playBaron(player) {
-        let targets = this.getAvailableTargets(),
+        const targets = this.getAvailableTargets(),
             callback = target => {
-                let targetPlayer = this.findPlayerInGame(target),
-                    acks = new Set(),
+                let acks = new Set();
+
+                const targetPlayer = this.findPlayerInGame(target),
                     acknowledge = ({id: playerId}) => {
                         return () => {
                             acks.add(playerId);
 
                             if(acks.size === 2){
-                                if(targetPlayer.cards[0].value === player.cards[0].value){
-                                    this.sendRoomMessage('baron-equal', this.displayPlayer(player), target);
-                                } else {
-                                    let losingPlayer = (targetPlayer.cards[0].value < player.cards[0].value) ? targetPlayer : player;
+                                let dataPoints = [player, targetPlayer],
+                                    message = 'baron-equal';
+
+                                if(targetPlayer.cards[0].value !== player.cards[0].value){
+                                    const losingPlayer = (targetPlayer.cards[0].value < player.cards[0].value) ? targetPlayer : player;
                                     this.discardCard(losingPlayer);
-                                    this.sendRoomMessage('baron-loser', this.displayPlayer(player), target, this.displayPlayer(losingPlayer));
+                                    
+                                    message = 'baron-loser';
+                                    dataPoints.push(losingPlayer);
                                 }
+
+                                this.sendRoomMessage(message, ...dataPoints.map(p => this.displayPlayer(p)));
             
                                 return this.nextPlayer();
                             }
                         };
                     };
                 
-                this.sendPlayerMessage(player, 'baron-view', target, targetPlayer.cards[0], acknowledge(player));
+                this.sendPlayerMessage(player, 'baron-view', this.displayPlayer(targetPlayer), targetPlayer.cards[0], acknowledge(player));
                 this.sendPlayerMessage(target, 'baron-view', this.displayPlayer(player), player.cards[0], acknowledge(target));
             };
 
@@ -259,10 +271,11 @@ class LoveLetters extends Game {
     }
     
     playPrince(player) {
-        let targets = this.getAvailableTargets(true),
+        const targets = this.getAvailableTargets(true),
             callback = target => {
-                let targetPlayer = this.findPlayerInGame(target);
+                const targetPlayer = this.findPlayerInGame(target);
                 this.discardCard(targetPlayer, true);
+
                 this.sendPlayerMessage(targetPlayer, 'prince-picked', this.displayPlayer(player), targetPlayer.cards, () => {
                     this.sendRoomMessage('prince-replace', this.displayPlayer(player), target);
                     return this.nextPlayer();
@@ -371,7 +384,7 @@ class LoveLetters extends Game {
         winner.affection += 1;
 
         if(winner.affection >= this.totalAffection){
-            this.sendRoomMessage('game-over', winner);
+            this.sendRoomMessage('game-over', [winner]);
         } else {
             let acks = new Set(),
                 acknowledge = player => {

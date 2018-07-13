@@ -16,10 +16,10 @@ class Server {
             {
                 id: 'jkh',
                 name: 'Joking Hazard',
-//            },
-//            {
-//                id: 'lol',
-//                name: 'Love Letter',
+           },
+           {
+               id: 'lol',
+               name: 'Love Letter',
 //            },
 //            {
 //                id: '31',
